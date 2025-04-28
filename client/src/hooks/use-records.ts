@@ -5,7 +5,7 @@ import type { PlantRecord } from "@shared/schema";
 export function useRecords() {
   return useQuery({
     queryKey: ['/api/records'],
-    queryFn: () => apiRequest<PlantRecord[]>('/api/records'),
+    queryFn: () => apiRequest('/api/records'),
   });
 }
 
@@ -14,7 +14,7 @@ export function usePlantRecords(plantId: number | null) {
     queryKey: ['/api/plants', plantId, 'records'],
     queryFn: () => 
       plantId 
-        ? apiRequest<PlantRecord[]>(`/api/plants/${plantId}/records`)
+        ? apiRequest(`/api/plants/${plantId}/records`)
         : Promise.resolve([]),
     enabled: !!plantId,
   });
@@ -25,7 +25,7 @@ export function useRecord(id: number | null) {
     queryKey: ['/api/records', id],
     queryFn: () => 
       id 
-        ? apiRequest<PlantRecord>(`/api/records/${id}`)
+        ? apiRequest(`/api/records/${id}`)
         : Promise.resolve(null),
     enabled: !!id,
   });
@@ -41,7 +41,7 @@ interface AddRecordInput {
 export function useAddRecord() {
   return useMutation({
     mutationFn: (record: AddRecordInput) => 
-      apiRequest<PlantRecord, AddRecordInput>('/api/records', {
+      apiRequest('/api/records', {
         method: 'POST',
         body: {
           ...record,
@@ -73,7 +73,7 @@ interface UpdateRecordInput {
 export function useUpdateRecord() {
   return useMutation({
     mutationFn: ({ id, ...data }: UpdateRecordInput) => 
-      apiRequest<PlantRecord, Partial<PlantRecord>>(`/api/records/${id}`, {
+      apiRequest(`/api/records/${id}`, {
         method: 'PUT',
         body: {
           ...data,
