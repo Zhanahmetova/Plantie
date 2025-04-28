@@ -4,7 +4,7 @@ import DatePicker from "@/components/ui/date-picker";
 import DailySummary from "@/components/daily-summary";
 import WeatherCard from "@/components/weather-card";
 import PlantCategories from "@/components/plant-categories";
-import { BellIcon } from "@/lib/icons";
+import { BellIcon, LeafIcon } from "@/lib/icons";
 import { format } from "date-fns";
 
 const Home: React.FC = () => {
@@ -12,31 +12,41 @@ const Home: React.FC = () => {
   
   return (
     <MainLayout>
-      <header className="px-1 pt-6 pb-2">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="font-bold text-2xl text-foreground">PlantPal</h1>
-            <p className="text-sm text-muted-foreground">
-              {format(selectedDate, "EEEE, MMM dd, yyyy")}
-            </p>
-          </div>
-          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
-            <BellIcon className="text-muted-foreground" />
-          </div>
+      <div className="nature-bg min-h-screen relative">
+        {/* Decorative leaf elements */}
+        <div className="absolute top-28 right-2 opacity-10 rotate-45 pointer-events-none">
+          <LeafIcon size={60} className="text-primary" />
         </div>
-      </header>
-      
-      <DatePicker 
-        selectedDate={selectedDate}
-        onDateSelect={setSelectedDate}
-        className="px-1"
-      />
-      
-      <DailySummary className="mb-4" />
-      
-      <WeatherCard className="mb-6" />
-      
-      <PlantCategories />
+        <div className="absolute bottom-20 left-2 opacity-10 -rotate-12 pointer-events-none">
+          <LeafIcon size={50} className="text-primary" />
+        </div>
+        
+        <header className="px-1 pt-7 pb-3">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="font-bold text-2xl text-foreground">Plant Care Assistant</h1>
+              <p className="text-sm text-muted-foreground">
+                {format(selectedDate, "EEEE, MMM dd, yyyy")}
+              </p>
+            </div>
+            <div className="w-11 h-11 bg-white rounded-full flex items-center justify-center shadow-sm">
+              <BellIcon className="text-muted-foreground" />
+            </div>
+          </div>
+        </header>
+        
+        <DatePicker 
+          selectedDate={selectedDate}
+          onDateSelect={setSelectedDate}
+          className="px-1 pb-1"
+        />
+        
+        <DailySummary className="mb-5" />
+        
+        <WeatherCard className="mb-7" />
+        
+        <PlantCategories />
+      </div>
     </MainLayout>
   );
 };

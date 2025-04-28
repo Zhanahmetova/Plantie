@@ -13,11 +13,12 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   value,
   max = 100,
   className,
-  showPercentage = true,
+  showPercentage = false,
   color = "primary"
 }) => {
   const percentage = Math.min(Math.max(0, (value / max) * 100), 100);
   
+  // Get the progress bar color based on the color prop
   const getColorClass = () => {
     switch (color) {
       case "primary":
@@ -25,25 +26,43 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       case "accent":
         return "bg-accent";
       case "green":
-        return "bg-green-400";
+        return "bg-[#4CAF50]";
       case "coral":
-        return "bg-primary";
+        return "bg-[#FF9800]";
       default:
         return "bg-primary";
     }
   };
   
+  // Get the background color for the progress track
+  const getTrackColorClass = () => {
+    switch (color) {
+      case "primary":
+        return "bg-[#E8F5E9]";
+      case "accent":
+        return "bg-[#FFF8E1]";
+      case "green":
+        return "bg-[#E8F5E9]";
+      case "coral":
+        return "bg-[#FFF3E0]";
+      default:
+        return "bg-[#E8F5E9]";
+    }
+  };
+  
   return (
     <div className={cn("w-full", className)}>
-      <div className="w-full bg-white rounded-full h-2">
-        <div 
-          className={cn("h-2 rounded-full progress-bar", getColorClass())}
-          style={{ width: `${percentage}%` }}
-        />
+      <div className="flex items-center">
+        <div className={cn("w-full rounded-full h-3", getTrackColorClass())}>
+          <div 
+            className={cn("h-3 rounded-full progress-bar", getColorClass())}
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+        {showPercentage && (
+          <p className="text-xs text-muted-foreground ml-2 font-medium">{Math.round(percentage)}%</p>
+        )}
       </div>
-      {showPercentage && (
-        <p className="text-xs text-muted-foreground mt-1 text-right">{Math.round(percentage)}%</p>
-      )}
     </div>
   );
 };
