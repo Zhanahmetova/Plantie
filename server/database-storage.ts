@@ -6,6 +6,7 @@ import {
   tasks, 
   weatherPreferences, 
   plantIdentifications,
+  plantRecords,
   type User, 
   type InsertUser, 
   type Plant, 
@@ -15,7 +16,9 @@ import {
   type WeatherPreference, 
   type InsertWeatherPreference, 
   type PlantIdentification, 
-  type InsertPlantIdentification 
+  type InsertPlantIdentification,
+  type PlantRecord,
+  type InsertPlantRecord
 } from '@shared/schema';
 import { IStorage } from './storage';
 
@@ -188,5 +191,61 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updatedIdentification;
+  }
+
+  // Plant record operations
+  async getPlantRecord(id: number): Promise<PlantRecord | undefined> {
+    const [record] = await db
+      .select()
+      .from(plantRecords)
+      .where(eq(plantRecords.id, id));
+      
+    return record;
+  }
+
+  async getPlantRecordsByUserId(userId: number): Promise<PlantRecord[]> {
+    return await db
+      .select()
+      .from(plantRecords)
+      .where(eq(plantRecords.userId, userId));
+  }
+
+  async getPlantRecordsByPlantId(plantId: number): Promise<PlantRecord[]> {
+    return await db
+      .select()
+      .from(plantRecords)
+      .where(eq(plantRecords.plantId, plantId));
+  }
+
+  async createPlantRecord(record: InsertPlantRecord): Promise<PlantRecord> {
+    const [newRecord] = await db
+      .insert(plantRecords)
+      .values({
+        ...record,
+        recordDate: record.recordDate || new Date(),
+        createdAt: new Date()
+      })
+      .returning();
+      
+    return newRecord;
+  }
+
+  async updatePlantRecord(id: number, update: Partial<PlantRecord>): Promise<PlantRecord | undefined> {
+    const [updatedRecord] = await db
+      .update(plantRecords)
+      .set(update)
+      .where(eq(plantRecords.id, id))
+      .returning();
+    
+    return updatedRecord;
+  }
+
+  async deletePlantRecord(id: number): Promise<boolean> {
+    const [deletedRecord] = await db
+      .delete(plantRecords)
+      .where(eq(plantRecords.id, id))
+      .returning();
+      
+    return !!deletedRecord;
   }
 }

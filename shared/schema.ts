@@ -168,3 +168,16 @@ export const plantIdentificationsRelations = relations(plantIdentifications, ({ 
     references: [users.id],
   }),
 }));
+
+// Plant record relations
+export const plantRecordsRelations = relations(plantRecords, ({ one }) => ({
+  user: one(users, {
+    fields: [plantRecords.userId],
+    references: [users.id],
+  }),
+  plant: one(plants, {
+    fields: [plantRecords.plantId],
+    references: [plants.id],
+    relationName: "plantRecords"
+  }),
+}));

@@ -3,7 +3,8 @@ import {
   plants, type Plant, type InsertPlant,
   tasks, type Task, type InsertTask,
   weatherPreferences, type WeatherPreference, type InsertWeatherPreference,
-  plantIdentifications, type PlantIdentification, type InsertPlantIdentification 
+  plantIdentifications, type PlantIdentification, type InsertPlantIdentification,
+  plantRecords, type PlantRecord, type InsertPlantRecord
 } from "@shared/schema";
 
 export interface IStorage {
@@ -37,6 +38,14 @@ export interface IStorage {
   createPlantIdentification(identification: InsertPlantIdentification): Promise<PlantIdentification>;
   getPlantIdentificationsByUserId(userId: number): Promise<PlantIdentification[]>;
   updatePlantIdentification(id: number, data: Partial<PlantIdentification>): Promise<PlantIdentification | undefined>;
+  
+  // Plant record operations
+  getPlantRecord(id: number): Promise<PlantRecord | undefined>;
+  getPlantRecordsByUserId(userId: number): Promise<PlantRecord[]>;
+  getPlantRecordsByPlantId(plantId: number): Promise<PlantRecord[]>;
+  createPlantRecord(record: InsertPlantRecord): Promise<PlantRecord>;
+  updatePlantRecord(id: number, record: Partial<PlantRecord>): Promise<PlantRecord | undefined>;
+  deletePlantRecord(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {

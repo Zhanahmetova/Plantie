@@ -1,7 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertPlantSchema, insertTaskSchema, insertWeatherPreferenceSchema, insertPlantIdentificationSchema } from "@shared/schema";
+import { 
+  insertPlantSchema, 
+  insertTaskSchema, 
+  insertWeatherPreferenceSchema, 
+  insertPlantIdentificationSchema,
+  insertPlantRecordSchema
+} from "@shared/schema";
 import { z } from "zod";
 
 // Constants
@@ -300,6 +306,140 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Not implemented" });
     } catch (error) {
       res.status(500).json({ message: 'Failed to get plant identification' });
+    }
+  });
+
+  // Plant records API
+  app.get('/api/records', async (req, res) => {
+    try {
+      const records = await storage.getPlantRecordsByUserId(DEMO_USER_ID);
+      res.json(records);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch records' });
+    }
+  });
+
+  app.get('/api/plants/:id/records', async (req, res) => {
+    try {
+      const plantId = parseInt(req.params.id);
+      if (isNaN(plantId)) {
+        return res.status(400).json({ message: 'Invalid plant ID' });
+      }
+
+      const plant = await storage.getPlant(plantId);
+      if (!plant) {
+        return res.status(404).json({ message: 'Plant not found' });
+      }
+
+      if (plant.userId !== DEMO_USER_ID) {
+        return res.status(403).json({ message: 'Not authorized to view records for this plant' });
+      }
+
+      const records = await storage.getPlantRecordsByPlantId(plantId);
+      res.json(records);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch records for plant' });
+    }
+  });
+
+  app.get('/api/records/:id', async (req, res) => {
+    try {
+      const recordId = parseInt(req.params.id);
+      if (isNaN(recordId)) {
+        return res.status(400).json({ message: 'Invalid record ID' });
+      }
+
+      const record = await storage.getPlantRecord(recordId);
+      if (!record) {
+        return res.status(404).json({ message: 'Record not found' });
+      }
+
+      if (record.userId !== DEMO_USER_ID) {
+        return res.status(403).json({ message: 'Not authorized to view this record' });
+      }
+      
+      res.json(record);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch record' });
+    }
+  });
+
+  app.post('/api/records', async (req, res) => {
+    try {
+      const parsedData = insertPlantRecordSchema.parse({
+        ...req.body,
+        userId: DEMO_USER_ID
+      });
+      
+      // If plantId is provided, verify it exists and belongs to user
+      if (parsedData.plantId) {
+        const plant = await storage.getPlant(parsedData.plantId);
+        if (!plant || plant.userId !== DEMO_USER_ID) {
+          return res.status(404).json({ message: 'Plant not found or not owned by user' });
+        }
+      }
+
+      const record = await storage.createPlantRecord(parsedData);
+      res.status(201).json(record);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid record data', errors: error.errors });
+      }
+      res.status(500).json({ message: 'Failed to create record' });
+    }
+  });
+
+  app.put('/api/records/:id', async (req, res) => {
+    try {
+      const recordId = parseInt(req.params.id);
+      if (isNaN(recordId)) {
+        return res.status(400).json({ message: 'Invalid record ID' });
+      }
+
+      const record = await storage.getPlantRecord(recordId);
+      if (!record) {
+        return res.status(404).json({ message: 'Record not found' });
+      }
+
+      if (record.userId !== DEMO_USER_ID) {
+        return res.status(403).json({ message: 'Not authorized to update this record' });
+      }
+
+      // If plantId is provided, verify it exists and belongs to user
+      if (req.body.plantId) {
+        const plant = await storage.getPlant(req.body.plantId);
+        if (!plant || plant.userId !== DEMO_USER_ID) {
+          return res.status(404).json({ message: 'Plant not found or not owned by user' });
+        }
+      }
+
+      const updatedRecord = await storage.updatePlantRecord(recordId, req.body);
+      res.json(updatedRecord);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update record' });
+    }
+  });
+
+  app.delete('/api/records/:id', async (req, res) => {
+    try {
+      const recordId = parseInt(req.params.id);
+      if (isNaN(recordId)) {
+        return res.status(400).json({ message: 'Invalid record ID' });
+      }
+
+      const record = await storage.getPlantRecord(recordId);
+      if (!record) {
+        return res.status(404).json({ message: 'Record not found' });
+      }
+
+      if (record.userId !== DEMO_USER_ID) {
+        return res.status(403).json({ message: 'Not authorized to delete this record' });
+      }
+
+      await storage.deletePlantRecord(recordId);
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to delete record' });
     }
   });
 
