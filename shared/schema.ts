@@ -1,4 +1,5 @@
 import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -96,3 +97,53 @@ export type InsertWeatherPreference = z.infer<typeof insertWeatherPreferenceSche
 
 export type PlantIdentification = typeof plantIdentifications.$inferSelect;
 export type InsertPlantIdentification = z.infer<typeof insertPlantIdentificationSchema>;
+
+// Relations
+
+// User relations
+export const usersRelations = relations(users, ({ many, one }) => ({
+  plants: many(plants),
+  tasks: many(tasks),
+  weatherPreference: one(weatherPreferences, {
+    fields: [users.id],
+    references: [weatherPreferences.userId],
+  }),
+  plantIdentifications: many(plantIdentifications),
+}));
+
+// Plant relations
+export const plantsRelations = relations(plants, ({ many, one }) => ({
+  user: one(users, {
+    fields: [plants.userId],
+    references: [users.id],
+  }),
+  tasks: many(tasks),
+}));
+
+// Task relations
+export const tasksRelations = relations(tasks, ({ one }) => ({
+  plant: one(plants, {
+    fields: [tasks.plantId],
+    references: [plants.id],
+  }),
+  user: one(users, {
+    fields: [tasks.userId],
+    references: [users.id],
+  }),
+}));
+
+// Weather preferences relations
+export const weatherPreferencesRelations = relations(weatherPreferences, ({ one }) => ({
+  user: one(users, {
+    fields: [weatherPreferences.userId],
+    references: [users.id],
+  }),
+}));
+
+// Plant identification relations
+export const plantIdentificationsRelations = relations(plantIdentifications, ({ one }) => ({
+  user: one(users, {
+    fields: [plantIdentifications.userId],
+    references: [users.id],
+  }),
+}));
