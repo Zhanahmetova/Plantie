@@ -23,7 +23,7 @@ const DailySummary: React.FC<DailySummaryProps> = ({
   if (isLoading) {
     return (
       <div className={cn(
-        "bg-white p-4 rounded-2xl shadow-sm animate-pulse",
+        "bg-white p-5 rounded-2xl shadow-sm animate-pulse",
         className
       )}>
         <div className="h-5 bg-muted rounded w-40 mb-1"></div>
@@ -37,20 +37,19 @@ const DailySummary: React.FC<DailySummaryProps> = ({
   
   return (
     <div className={cn(
-      "bg-white p-4 rounded-2xl shadow-sm",
+      "bg-white p-5 rounded-2xl shadow-sm",
       className
     )}>
-      <div className="mb-3">
+      <div className="mb-4">
         <h2 className="font-semibold text-lg text-foreground">
-          You have {totalTasks} tasks
+          You have {totalTasks} tasks today
         </h2>
-        <p className="text-sm text-muted-foreground">Today's Reminders</p>
       </div>
       
-      <div className="flex space-x-2 mb-4 overflow-x-auto">
+      <div className="flex space-x-2 mb-5 overflow-x-auto">
         <button 
           className={cn(
-            "px-4 py-2 rounded-full text-sm font-medium flex items-center whitespace-nowrap",
+            "px-5 py-2.5 rounded-full text-sm font-medium flex items-center whitespace-nowrap transition-colors",
             activeFilter === "all" 
               ? "bg-primary text-white" 
               : "bg-muted text-foreground"
@@ -62,7 +61,7 @@ const DailySummary: React.FC<DailySummaryProps> = ({
         </button>
         <button 
           className={cn(
-            "px-4 py-2 rounded-full text-sm font-medium flex items-center whitespace-nowrap",
+            "px-5 py-2.5 rounded-full text-sm font-medium flex items-center whitespace-nowrap transition-colors",
             activeFilter === "watering" 
               ? "bg-primary text-white" 
               : "bg-muted text-foreground"
@@ -74,7 +73,7 @@ const DailySummary: React.FC<DailySummaryProps> = ({
         </button>
         <button 
           className={cn(
-            "px-4 py-2 rounded-full text-sm font-medium flex items-center whitespace-nowrap",
+            "px-5 py-2.5 rounded-full text-sm font-medium flex items-center whitespace-nowrap transition-colors",
             activeFilter === "misting" 
               ? "bg-primary text-white" 
               : "bg-muted text-foreground"
@@ -111,13 +110,13 @@ const DailySummary: React.FC<DailySummaryProps> = ({
         (activeFilter === "watering" && wateringTasks.length === 0) || 
         (activeFilter === "misting" && mistingTasks.length === 0)
       ) && (
-        <div className="text-center py-4 text-muted-foreground">
+        <div className="text-center py-6 text-muted-foreground rounded-xl bg-muted/30">
           No {activeFilter} tasks for today
         </div>
       )}
       
       {activeFilter === "all" && totalTasks === 0 && (
-        <div className="text-center py-4 text-muted-foreground">
+        <div className="text-center py-6 text-muted-foreground rounded-xl bg-muted/30">
           No tasks for today
         </div>
       )}

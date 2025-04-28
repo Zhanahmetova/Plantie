@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --background: 164 60% 94%;
+  --background: 164 60% 96%;  /* Lighter mint background */
   --foreground: 20 14.3% 4.1%;
   --muted: 60 4.8% 95.9%;
   --muted-foreground: 25 5.3% 44.7%;
@@ -13,29 +13,33 @@
   --card-foreground: 20 14.3% 4.1%;
   --border: 20 5.9% 90%;
   --input: 20 5.9% 90%;
-  --primary: 28 93% 70%;
+  --primary: 157 83% 45%;    /* Mint green main color */
   --primary-foreground: 60 9.1% 97.8%;
   --secondary: 60 4.8% 95.9%;
   --secondary-foreground: 24 9.8% 10%;
-  --accent: 164 51% 75%;
+  --accent: 28 93% 70%;      /* Soft orange accent */
   --accent-foreground: 24 9.8% 10%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 60 9.1% 97.8%;
   --ring: 20 14.3% 4.1%;
-  --radius: 1rem;
+  --radius: 1.25rem;         /* Increased border radius */
   
-  /* Custom colors */
+  /* Custom colors matching the design document */
   --mint-light: 164 60% 94%;
-  --mint: 164 51% 75%;
-  --mint-dark: 164 44% 71%;
+  --mint: 157 83% 45%;
+  --mint-dark: 157 83% 35%;
   --coral-light: 28 100% 85%;
   --coral: 28 93% 70%;
   --coral-dark: 28 67% 63%;
-  --chart-1: var(--primary);
+  --sky-blue: 195 83% 75%;
+  --light-beige: 40 50% 96%;
+  
+  /* Chart colors */
+  --chart-1: var(--mint);
   --chart-2: 152 57% 58%;
-  --chart-3: 170 80% 70%;
-  --chart-4: 190 90% 80%;
-  --chart-5: 210 100% 90%;
+  --chart-3: 195 83% 75%;    /* Sky blue */
+  --chart-4: 28 93% 70%;     /* Soft orange */
+  --chart-5: 40 50% 96%;     /* Light beige */
 }
 
 .dark {
@@ -78,5 +82,26 @@
   
   .progress-bar {
     @apply transition-all duration-1000 ease-in-out;
+  }
+  
+  /* Animated elements for UI delight */
+  .water-drop {
+    @apply animate-bounce opacity-70;
+  }
+  
+  .plant-grow {
+    @apply transition-transform duration-1000 hover:scale-105;
+  }
+  
+  /* Card styles */
+  .plant-card {
+    @apply bg-white rounded-2xl shadow-sm p-4 transition-all hover:shadow-md;
+  }
+  
+  /* Nature-inspired backgrounds */
+  .nature-bg {
+    background-image: radial-gradient(circle at 90% 10%, hsla(157, 83%, 45%, 0.1), transparent 40%),
+                      radial-gradient(circle at 10% 90%, hsla(28, 93%, 70%, 0.1), transparent 40%),
+                      radial-gradient(circle at 50% 50%, hsla(195, 83%, 75%, 0.05), transparent 70%);
   }
 }

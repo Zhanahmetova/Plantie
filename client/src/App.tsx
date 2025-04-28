@@ -13,11 +13,14 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/plants/:id" component={PlantDetailPage} />
+      {/* Routes matching the new bottom navigation */}
+      <Route path="/favorites" component={() => <div className="p-4 text-center mt-12">Favorites page</div>} />
+      <Route path="/add-plant" component={PlantIdentificationPage} />
+      <Route path="/records" component={() => <div className="p-4 text-center mt-12">Records page</div>} />
+      <Route path="/settings" component={() => <div className="p-4 text-center mt-12">Settings page</div>} />
+      {/* Legacy routes for compatibility */}
       <Route path="/identify" component={PlantIdentificationPage} />
-      {/* Additional routes - not fully implemented in this version */}
-      <Route path="/plants" component={() => <div>Plants page</div>} />
-      <Route path="/tasks" component={() => <div>Tasks page</div>} />
-      <Route path="/profile" component={() => <div>Profile page</div>} />
+      <Route path="/plants" component={() => <div className="p-4 text-center mt-12">Plants page</div>} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

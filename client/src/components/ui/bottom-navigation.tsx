@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 import { Link, useLocation } from "wouter";
 import { 
   HomeIcon, 
-  PlantsIcon, 
-  CameraIcon, 
-  TasksIcon, 
-  ProfileIcon 
+  HeartIcon, 
+  PlusIcon, 
+  BookIcon, 
+  SettingsIcon 
 } from "@/lib/icons";
 
 interface BottomNavigationProps {
@@ -47,67 +47,67 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
           </div>
         </Link>
         
-        <Link href="/plants">
+        <Link href="/favorites">
           <div className="p-2 flex flex-col items-center cursor-pointer">
             <div className={cn(
               "w-10 h-10 rounded-full flex items-center justify-center",
-              isActive("/plants") ? "bg-mint-light" : "bg-muted"
+              isActive("/favorites") ? "bg-mint-light" : "bg-muted"
             )}>
-              <PlantsIcon className={isActive("/plants") ? "text-accent-foreground" : "text-muted-foreground"} />
+              <HeartIcon className={isActive("/favorites") ? "text-accent-foreground" : "text-muted-foreground"} />
             </div>
             <span className={cn(
               "text-xs mt-1",
-              isActive("/plants") ? "text-foreground" : "text-muted-foreground"
+              isActive("/favorites") ? "text-foreground" : "text-muted-foreground"
             )}>
-              My Plants
+              Favorites
             </span>
           </div>
         </Link>
         
-        <Link href="/identify">
+        <Link href="/add-plant">
           <div className="p-2 flex flex-col items-center cursor-pointer">
             <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center -mt-7 shadow-md">
-              <CameraIcon className="text-white text-xl" />
+              <PlusIcon className="text-white text-xl" />
             </div>
             <span className={cn(
               "text-xs mt-1",
-              isActive("/identify") ? "text-foreground" : "text-muted-foreground"
+              isActive("/add-plant") ? "text-foreground" : "text-muted-foreground"
             )}>
-              Identify
+              Add Plant
             </span>
           </div>
         </Link>
         
-        <Link href="/tasks">
+        <Link href="/records">
           <div className="p-2 flex flex-col items-center cursor-pointer">
             <div className={cn(
               "w-10 h-10 rounded-full flex items-center justify-center",
-              isActive("/tasks") ? "bg-mint-light" : "bg-muted"
+              isActive("/records") ? "bg-mint-light" : "bg-muted"
             )}>
-              <TasksIcon className={isActive("/tasks") ? "text-accent-foreground" : "text-muted-foreground"} />
+              <BookIcon className={isActive("/records") ? "text-accent-foreground" : "text-muted-foreground"} />
             </div>
             <span className={cn(
               "text-xs mt-1",
-              isActive("/tasks") ? "text-foreground" : "text-muted-foreground"
+              isActive("/records") ? "text-foreground" : "text-muted-foreground"
             )}>
-              Tasks
+              Records
             </span>
           </div>
         </Link>
         
-        <Link href="/profile">
+        <Link href="/settings">
           <div className="p-2 flex flex-col items-center cursor-pointer">
             <div className={cn(
               "w-10 h-10 rounded-full flex items-center justify-center",
-              isActive("/profile") ? "bg-mint-light" : "bg-muted"
+              isActive("/settings") ? "bg-mint-light" : "bg-muted"
             )}>
-              <ProfileIcon className={isActive("/profile") ? "text-accent-foreground" : "text-muted-foreground"} />
+              <SettingsIcon className={isActive("/settings") ? "text-accent-foreground" : "text-muted-foreground"} />
             </div>
             <span className={cn(
               "text-xs mt-1",
-              isActive("/profile") ? "text-foreground" : "text-muted-foreground"
+              isActive("/settings") ? "text-foreground" : "text-muted-foreground"
             )}>
-              Profile
+              Settings
             </span>
           </div>
         </Link>

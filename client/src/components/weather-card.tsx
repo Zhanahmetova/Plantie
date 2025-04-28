@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { useWeather } from "@/hooks/use-weather";
-import { PlusCircleIcon } from "@/lib/icons";
+import { PlusCircleIcon, SunIcon } from "@/lib/icons";
 
 interface WeatherCardProps {
   className?: string;
@@ -15,7 +15,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
   if (isLoading) {
     return (
       <div className={cn(
-        "bg-white p-4 rounded-2xl shadow-sm relative overflow-hidden h-32 animate-pulse",
+        "bg-white p-5 rounded-2xl shadow-sm relative overflow-hidden h-36 animate-pulse",
         className
       )}>
         <div className="h-4 w-24 bg-muted rounded mb-2"></div>
@@ -27,7 +27,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
   
   return (
     <div className={cn(
-      "bg-white p-4 rounded-2xl shadow-sm relative overflow-hidden",
+      "bg-white p-5 rounded-2xl shadow-sm relative overflow-hidden",
       className
     )}>
       <div className="flex justify-between items-start">
@@ -48,8 +48,8 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
             <span>↓{weather?.low || 10}°</span>
           </div>
         </div>
-        <button className="bg-accent text-accent-foreground rounded-full px-3 py-1 text-sm flex items-center">
-          <PlusCircleIcon size={16} className="mr-1" /> Add
+        <button className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-full px-4 py-1.5 text-sm flex items-center transition-colors">
+          <PlusCircleIcon size={16} className="mr-1.5" /> Add
         </button>
       </div>
       
@@ -73,6 +73,11 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
             opacity="0.3"
           />
         </svg>
+      </div>
+      
+      {/* Animated Sun Icon */}
+      <div className="absolute top-4 right-16 opacity-20 pointer-events-none animate-pulse">
+        <SunIcon size={40} className="text-yellow-500" />
       </div>
     </div>
   );

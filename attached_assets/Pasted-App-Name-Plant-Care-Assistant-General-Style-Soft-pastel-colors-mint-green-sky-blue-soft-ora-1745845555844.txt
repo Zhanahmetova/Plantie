@@ -1,0 +1,80 @@
+App Name: Plant Care Assistant
+
+General Style:
+	•	Soft pastel colors: mint green, sky blue, soft orange, light beige.
+	•	Nature-inspired backgrounds: subtle flowers, soft gradients.
+	•	Smooth, rounded UI components (border radius 20px+).
+	•	Light, airy feel: lots of white space, large margins.
+	•	Modern, friendly sans-serif fonts.
+	•	Small plant illustrations and animated icons for watering/misting.
+
+⸻
+
+Home Screen
+	•	Top Date + Day Picker (horizontal scroll: Thu, Fri, Sat, Sun, etc.).
+	•	Section: “You have X tasks today”
+	•	Tabs: All | Watering | Misting
+	•	Task Cards:
+	•	Cute icon (watering can/misting bottle).
+	•	Plant care stats (e.g., “20 plants need watering - 80% done”).
+	•	Progress bar.
+	•	Bottom Navigation Bar:
+	•	Home 🏠
+	•	Favorites ❤️
+	•	Add Plant ➕
+	•	Records 📖
+	•	Settings ⚙️
+
+⸻
+
+My Garden / Plants Overview Screen
+	•	Weather Widget at the top (e.g., “It’s Sunny Out - 20°C”).
+	•	Two tabs: All Plants / Indoor Plants.
+	•	Grid of Plant Cards:
+	•	Plant name.
+	•	Plant type (e.g., “Vascular Plant”).
+	•	Rounded rectangular cards with pastel backgrounds.
+	•	“Add” Button (green, top-right corner).
+
+⸻
+
+Add Record / Camera Screen
+	•	Open camera instantly.
+	•	Live camera preview inside a soft rounded rectangle.
+	•	After taking a picture:
+	•	Show “Добавить новую запись” (Add New Record) block.
+	•	Large photo preview.
+	•	Textarea: “Write a note…” (optional).
+	•	Date auto-filled (editable).
+	•	“Save” button (bottom).
+
+⸻
+
+UX Best Practices
+	•	Smooth transitions (between screens, card animations).
+	•	Feedback on actions (small success toasts: “Record Added ✅”).
+	•	Easy, intuitive navigation (big tap targets, clear icons).
+	•	Accessibility: font sizes 16px minimum, sufficient color contrast.
+
+⸻
+
+🎨 Design Visual References
+	•	Exactly like the attached sample:
+	•	Rounded day picker at the top.
+	•	Bright, positive atmosphere.
+	•	Illustrated background and light plant accents.
+
+⸻
+
+✅ Uizard Key Instructions
+	•	Use card-based layouts everywhere.
+	•	Show progress visually (bars, percentages).
+	•	Focus heavily on plants and care tasks visually.
+	•	Make every interaction feel soft and friendly.
+	•	Keep it simple: 3–4 main actions per screen max.
+
+⸻
+
+Bonus Idea:
+
+✨ Add small animated icons for watering, misting, sunshine effects — it will make the app feel even more alive and joyful!
