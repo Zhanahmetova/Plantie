@@ -54,12 +54,14 @@ export class MemStorage implements IStorage {
   private tasks: Map<number, Task>;
   private weatherPreferences: Map<number, WeatherPreference>;
   private plantIdentifications: Map<number, PlantIdentification>;
+  private plantRecords: Map<number, PlantRecord>;
   
   private currentUserId: number;
   private currentPlantId: number;
   private currentTaskId: number;
   private currentWeatherPreferenceId: number;
   private currentPlantIdentificationId: number;
+  private currentPlantRecordId: number;
 
   constructor() {
     this.users = new Map();
@@ -67,12 +69,14 @@ export class MemStorage implements IStorage {
     this.tasks = new Map();
     this.weatherPreferences = new Map();
     this.plantIdentifications = new Map();
+    this.plantRecords = new Map();
     
     this.currentUserId = 1;
     this.currentPlantId = 1;
     this.currentTaskId = 1;
     this.currentWeatherPreferenceId = 1;
     this.currentPlantIdentificationId = 1;
+    this.currentPlantRecordId = 1;
 
     // Add sample user
     this.createUser({ 
@@ -348,6 +352,48 @@ export class MemStorage implements IStorage {
     const updatedIdentification = { ...identification, ...update };
     this.plantIdentifications.set(id, updatedIdentification);
     return updatedIdentification;
+  }
+  
+  // Plant record operations
+  async getPlantRecord(id: number): Promise<PlantRecord | undefined> {
+    return this.plantRecords.get(id);
+  }
+
+  async getPlantRecordsByUserId(userId: number): Promise<PlantRecord[]> {
+    return Array.from(this.plantRecords.values()).filter(
+      (record) => record.userId === userId
+    );
+  }
+
+  async getPlantRecordsByPlantId(plantId: number): Promise<PlantRecord[]> {
+    return Array.from(this.plantRecords.values()).filter(
+      (record) => record.plantId === plantId
+    );
+  }
+
+  async createPlantRecord(record: InsertPlantRecord): Promise<PlantRecord> {
+    const id = this.currentPlantRecordId++;
+    const newRecord: PlantRecord = { 
+      ...record, 
+      id,
+      recordDate: record.recordDate || new Date(),
+      createdAt: new Date()
+    };
+    this.plantRecords.set(id, newRecord);
+    return newRecord;
+  }
+
+  async updatePlantRecord(id: number, recordUpdate: Partial<PlantRecord>): Promise<PlantRecord | undefined> {
+    const record = this.plantRecords.get(id);
+    if (!record) return undefined;
+    
+    const updatedRecord = { ...record, ...recordUpdate };
+    this.plantRecords.set(id, updatedRecord);
+    return updatedRecord;
+  }
+
+  async deletePlantRecord(id: number): Promise<boolean> {
+    return this.plantRecords.delete(id);
   }
 }
 

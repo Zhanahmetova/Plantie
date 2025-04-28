@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import PlantDetailPage from "@/pages/plant-detail";
 import PlantIdentificationPage from "@/pages/plant-identification";
+import RecordsPage from "@/pages/records";
 
 function Router() {
   return (
@@ -16,7 +17,7 @@ function Router() {
       {/* Routes matching the new bottom navigation */}
       <Route path="/favorites" component={() => <div className="p-4 text-center mt-12">Favorites page</div>} />
       <Route path="/add-plant" component={PlantIdentificationPage} />
-      <Route path="/records" component={() => <div className="p-4 text-center mt-12">Records page</div>} />
+      <Route path="/records" component={RecordsPage} />
       <Route path="/settings" component={() => <div className="p-4 text-center mt-12">Settings page</div>} />
       {/* Legacy routes for compatibility */}
       <Route path="/identify" component={PlantIdentificationPage} />
