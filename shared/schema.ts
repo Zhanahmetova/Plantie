@@ -82,6 +82,22 @@ export const insertPlantIdentificationSchema = createInsertSchema(plantIdentific
   createdAt: true,
 });
 
+// PlantRecord table
+export const plantRecords = pgTable("plant_records", {
+  id: serial("id").primaryKey(),
+  image: text("image").notNull(),
+  note: text("note"),
+  plantId: integer("plant_id"),
+  userId: integer("user_id").notNull(),
+  recordDate: timestamp("record_date").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertPlantRecordSchema = createInsertSchema(plantRecords).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Type definitions
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -98,6 +114,9 @@ export type InsertWeatherPreference = z.infer<typeof insertWeatherPreferenceSche
 export type PlantIdentification = typeof plantIdentifications.$inferSelect;
 export type InsertPlantIdentification = z.infer<typeof insertPlantIdentificationSchema>;
 
+export type PlantRecord = typeof plantRecords.$inferSelect;
+export type InsertPlantRecord = z.infer<typeof insertPlantRecordSchema>;
+
 // Relations
 
 // User relations
@@ -109,6 +128,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
     references: [weatherPreferences.userId],
   }),
   plantIdentifications: many(plantIdentifications),
+  plantRecords: many(plantRecords),
 }));
 
 // Plant relations
@@ -118,6 +138,7 @@ export const plantsRelations = relations(plants, ({ many, one }) => ({
     references: [users.id],
   }),
   tasks: many(tasks),
+  records: many(plantRecords, { relationName: "plantRecords" }),
 }));
 
 // Task relations
