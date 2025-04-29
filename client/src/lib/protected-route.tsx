@@ -1,24 +1,35 @@
 import { useAuth } from "@/hooks/use-auth";
-import { Loader2 } from "lucide-react";
 import { Redirect, Route } from "wouter";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import React, { ComponentType, LazyExoticComponent } from "react";
+
+type ComponentProp = 
+  | (() => React.JSX.Element) 
+  | LazyExoticComponent<ComponentType<any>>;
 
 export function ProtectedRoute({
   path,
   component: Component,
 }: {
   path: string;
-  component: () => React.JSX.Element;
+  component: ComponentProp;
 }) {
   const { user, isLoading } = useAuth();
+
+  // Function to render with proper type handling
+  const renderComponent = () => {
+    const Comp = Component as any;
+    return <Comp />;
+  };
 
   return (
     <Route path={path}>
       {isLoading ? (
         <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <LoadingSpinner size="lg" text="Loading..." />
         </div>
       ) : user ? (
-        <Component />
+        renderComponent()
       ) : (
         <Redirect to="/auth" />
       )}
