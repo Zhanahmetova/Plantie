@@ -5,23 +5,28 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
+import AuthPage from "@/pages/auth-page";
 import PlantDetailPage from "@/pages/plant-detail";
 import PlantIdentificationPage from "@/pages/plant-identification";
 import RecordsPage from "@/pages/records";
+import { ProtectedRoute } from "./lib/protected-route";
+import { AuthProvider } from "./hooks/use-auth";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/plants/:id" component={PlantDetailPage} />
+      <ProtectedRoute path="/" component={Home} />
+      <ProtectedRoute path="/plants/:id" component={PlantDetailPage} />
       {/* Routes matching the new bottom navigation */}
-      <Route path="/favorites" component={() => <div className="p-4 text-center mt-12">Favorites page</div>} />
-      <Route path="/add-plant" component={PlantIdentificationPage} />
-      <Route path="/records" component={RecordsPage} />
-      <Route path="/settings" component={() => <div className="p-4 text-center mt-12">Settings page</div>} />
+      <ProtectedRoute path="/favorites" component={() => <div className="p-4 text-center mt-12">Favorites page</div>} />
+      <ProtectedRoute path="/add-plant" component={PlantIdentificationPage} />
+      <ProtectedRoute path="/records" component={RecordsPage} />
+      <ProtectedRoute path="/settings" component={() => <div className="p-4 text-center mt-12">Settings page</div>} />
       {/* Legacy routes for compatibility */}
-      <Route path="/identify" component={PlantIdentificationPage} />
-      <Route path="/plants" component={() => <div className="p-4 text-center mt-12">Plants page</div>} />
+      <ProtectedRoute path="/identify" component={PlantIdentificationPage} />
+      <ProtectedRoute path="/plants" component={() => <div className="p-4 text-center mt-12">Plants page</div>} />
+      {/* Authentication route */}
+      <Route path="/auth" component={AuthPage} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
@@ -31,10 +36,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
