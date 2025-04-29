@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { useRecords } from "@/hooks/use-records";
 import { PlusIcon, CameraIcon, BookIcon } from "@/lib/icons";
 import RecordItem from "@/components/record-item";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import type { PlantRecord } from "@shared/schema";
 
 interface RecordsProps {
@@ -14,11 +15,41 @@ interface RecordsProps {
 
 const Records: React.FC<RecordsProps> = ({ className }) => {
   const [, navigate] = useLocation();
-  const { data: records = [] } = useRecords();
+  const { data: records = [], isLoading } = useRecords();
   
   const navigateToAddRecord = () => {
     navigate('/add-record');
   };
+
+  if (isLoading) {
+    return (
+      <div className={cn("space-y-6 pb-20", className)}>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <BookIcon />
+            Records
+          </h1>
+          <div className="w-32 h-10 bg-muted rounded-md animate-pulse"></div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="h-48 animate-pulse p-4">
+              <div className="flex h-full">
+                <div className="w-1/3 bg-muted rounded-md"></div>
+                <div className="w-2/3 pl-4 space-y-2">
+                  <div className="h-4 bg-muted rounded-md w-3/4"></div>
+                  <div className="h-4 bg-muted rounded-md w-1/2"></div>
+                  <div className="h-4 bg-muted rounded-md w-2/3"></div>
+                  <div className="h-4 bg-muted rounded-md w-1/4"></div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("space-y-6 pb-20", className)}>
