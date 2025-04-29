@@ -10,6 +10,7 @@ import PlantDetailPage from "@/pages/plant-detail";
 import PlantIdentificationPage from "@/pages/plant-identification";
 import RecordsPage from "@/pages/records";
 import AddRecordPage from "@/pages/add-record";
+import AddPlantPage from "@/pages/add-plant";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
 
@@ -20,7 +21,7 @@ function Router() {
       <ProtectedRoute path="/plants/:id" component={PlantDetailPage} />
       {/* Routes matching the new bottom navigation */}
       <ProtectedRoute path="/favorites" component={() => <div className="p-4 text-center mt-12">Favorites page</div>} />
-      <ProtectedRoute path="/add-plant" component={PlantIdentificationPage} />
+      <ProtectedRoute path="/add-plant" component={AddPlantPage} />
       <ProtectedRoute path="/records" component={RecordsPage} />
       <ProtectedRoute path="/add-record" component={AddRecordPage} />
       <ProtectedRoute path="/settings" component={() => <div className="p-4 text-center mt-12">Settings page</div>} />

@@ -19,10 +19,15 @@ export function useAddPlant() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (plant: Omit<Plant, "id">) => {
-      const response = await apiRequest("POST", "/api/plants", plant);
-      return response.json();
-    },
+    mutationFn: (plant: any) => 
+      apiRequest("/api/plants", {
+        method: "POST",
+        body: {
+          ...plant,
+          lastWatered: null,
+          lastFertilized: null
+        }
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/plants"] });
     }
@@ -33,10 +38,11 @@ export function useUpdatePlant() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, plant }: { id: number, plant: Partial<Plant> }) => {
-      const response = await apiRequest("PUT", `/api/plants/${id}`, plant);
-      return response.json();
-    },
+    mutationFn: ({ id, plant }: { id: number, plant: Partial<Plant> }) => 
+      apiRequest(`/api/plants/${id}`, {
+        method: "PUT",
+        body: plant
+      }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/plants"] });
       queryClient.invalidateQueries({ queryKey: ["/api/plants", variables.id] });
@@ -48,10 +54,8 @@ export function useDeletePlant() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/plants/${id}`);
-      return id;
-    },
+    mutationFn: (id: number) => 
+      apiRequest(`/api/plants/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/plants"] });
     }
