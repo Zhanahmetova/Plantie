@@ -5,7 +5,6 @@ import type { PlantRecord } from "@shared/schema";
 export function useRecords() {
   return useQuery({
     queryKey: ['/api/records'],
-    queryFn: () => apiRequest('/api/records'),
   });
 }
 
