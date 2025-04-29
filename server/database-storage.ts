@@ -1,9 +1,9 @@
 import { eq, and, gte, lt } from 'drizzle-orm';
 import { db } from './db';
 import { pool } from './db';
-import * as expressSession from 'express-session';
+import session from 'express-session';
 import { Store } from 'express-session';
-import connectPg from 'connect-pg-simple';
+import connectPgSimple from 'connect-pg-simple';
 import { 
   users, 
   plants, 
@@ -26,7 +26,7 @@ import {
 } from '@shared/schema';
 import { IStorage } from './storage';
 
-const PostgresSessionStore = connectPg(expressSession);
+const PostgresSessionStore = connectPgSimple(session);
 
 export class DatabaseStorage implements IStorage {
   public sessionStore: Store;

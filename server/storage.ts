@@ -7,7 +7,7 @@ import {
   plantRecords, type PlantRecord, type InsertPlantRecord
 } from "@shared/schema";
 
-import * as expressSession from "express-session";
+import session from "express-session";
 import { Store } from "express-session";
 
 export interface IStorage {
@@ -58,7 +58,7 @@ import createMemoryStore from "memorystore";
 import connectPg from "connect-pg-simple";
 import { db } from "./db";
 
-const MemoryStore = createMemoryStore(expressSession);
+const MemoryStore = createMemoryStore(session);
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
