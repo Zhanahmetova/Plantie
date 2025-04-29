@@ -7,6 +7,7 @@ import { usePlants } from "@/hooks/use-plants";
 import { useAddRecord } from "@/hooks/use-records";
 import CameraCapture from "@/components/camera-capture";
 import MainLayout from "@/components/layouts/main-layout";
+import PageHeader from "@/components/ui/page-header";
 import { format } from "date-fns";
 
 const AddRecordPage: React.FC = () => {
@@ -47,7 +48,7 @@ const AddRecordPage: React.FC = () => {
     try {
       await addRecord.mutateAsync({
         image: capturedImage,
-        note: note.trim() || null,
+        note: note.trim() ? note.trim() : undefined,
         plantId: selectedPlantId,
         recordDate,
       });
@@ -68,8 +69,13 @@ const AddRecordPage: React.FC = () => {
   };
 
   return (
-    <MainLayout title={stage === "capture" ? "Take a Photo" : "Add New Record"} showBackButton>
+    <MainLayout hideNavigation>
       <div className="p-4 space-y-4">
+        <PageHeader 
+          title={stage === "capture" ? "Take a Photo" : "Add New Record"} 
+          showBackButton 
+          onBackClick={handleCancelCapture}
+        />
         {stage === "capture" ? (
           <Card className="p-4 bg-card/60 backdrop-blur-sm rounded-3xl overflow-hidden">
             <CameraCapture 

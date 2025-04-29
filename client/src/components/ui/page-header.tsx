@@ -20,7 +20,8 @@ const PageHeader: React.FC<PageHeaderProps> = ({
     if (onBackClick) {
       onBackClick();
     } else {
-      navigate(-1);
+      // Go back to previous page
+      window.history.back();
     }
   };
 

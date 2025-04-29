@@ -1,69 +1,23 @@
-import React, { useState } from "react";
+import React from "react";
+import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { usePlants } from "@/hooks/use-plants";
-import { useRecords, useAddRecord } from "@/hooks/use-records";
+import { useRecords } from "@/hooks/use-records";
 import { PlusIcon, CameraIcon, BookIcon } from "@/lib/icons";
-import { useIsMobile } from "@/hooks/use-mobile";
 import RecordItem from "@/components/record-item";
-import CameraCapture from "@/components/camera-capture";
+import type { PlantRecord } from "@shared/schema";
 
 interface RecordsProps {
   className?: string;
 }
 
 const Records: React.FC<RecordsProps> = ({ className }) => {
-  const isMobile = useIsMobile();
-  const { data: plants = [] } = usePlants();
+  const [, navigate] = useLocation();
   const { data: records = [] } = useRecords();
-  const addRecord = useAddRecord();
   
-  const [isCapturingPhoto, setIsCapturingPhoto] = useState(false);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const [selectedPlantId, setSelectedPlantId] = useState<number | null>(null);
-  const [note, setNote] = useState("");
-  const [isAddingRecord, setIsAddingRecord] = useState(false);
-
-  const handleStartCapture = () => {
-    setIsCapturingPhoto(true);
-    setIsAddingRecord(true);
-  };
-
-  const handleImageCapture = (imageData: string) => {
-    setCapturedImage(imageData);
-    setIsCapturingPhoto(false);
-  };
-
-  const handleCancelCapture = () => {
-    setIsCapturingPhoto(false);
-    setCapturedImage(null);
-    setSelectedPlantId(null);
-    setNote("");
-    setIsAddingRecord(false);
-  };
-
-  const handleSaveRecord = async () => {
-    if (!capturedImage) return;
-    
-    try {
-      await addRecord.mutateAsync({
-        image: capturedImage,
-        note,
-        plantId: selectedPlantId,
-        recordDate: new Date(),
-      });
-      
-      // Reset form after successful submission
-      setCapturedImage(null);
-      setSelectedPlantId(null);
-      setNote("");
-      setIsAddingRecord(false);
-    } catch (error) {
-      console.error("Failed to save record:", error);
-    }
+  const navigateToAddRecord = () => {
+    navigate('/add-record');
   };
 
   return (
@@ -74,7 +28,7 @@ const Records: React.FC<RecordsProps> = ({ className }) => {
           Records
         </h1>
         <Button 
-          onClick={handleStartCapture} 
+          onClick={navigateToAddRecord} 
           className="bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600"
         >
           <PlusIcon className="mr-2" />
@@ -82,76 +36,7 @@ const Records: React.FC<RecordsProps> = ({ className }) => {
         </Button>
       </div>
       
-      {isCapturingPhoto && (
-        <Card className="p-4 bg-card/60 backdrop-blur-sm rounded-3xl overflow-hidden">
-          <div className="mb-2 text-lg font-medium">Take a Photo</div>
-          <CameraCapture 
-            onCapture={handleImageCapture} 
-            onCancel={handleCancelCapture}
-          />
-        </Card>
-      )}
-      
-      {capturedImage && !isCapturingPhoto && (
-        <Card className="p-4 bg-card/60 backdrop-blur-sm rounded-3xl overflow-hidden">
-          <div className="mb-2 text-lg font-medium">Add New Record</div>
-          <div className="space-y-4">
-            <div className="aspect-w-4 aspect-h-3 rounded-xl overflow-hidden bg-muted">
-              <img 
-                src={capturedImage} 
-                alt="Captured" 
-                className="object-cover w-full h-full"
-              />
-            </div>
-            
-            <div className="grid gap-2">
-              <label htmlFor="plant" className="text-sm font-medium">
-                Plant (optional)
-              </label>
-              <select
-                id="plant"
-                className="w-full p-2 border rounded-lg bg-background"
-                value={selectedPlantId || ""}
-                onChange={(e) => setSelectedPlantId(e.target.value ? Number(e.target.value) : null)}
-              >
-                <option value="">Select a plant</option>
-                {plants.map((plant) => (
-                  <option key={plant.id} value={plant.id}>
-                    {plant.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <div className="grid gap-2">
-              <label htmlFor="note" className="text-sm font-medium">
-                Notes
-              </label>
-              <Textarea
-                id="note"
-                placeholder="Add notes about this record..."
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                className="min-h-[100px] resize-none"
-              />
-            </div>
-            
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={handleCancelCapture}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleSaveRecord} 
-                className="bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600"
-              >
-                Save Record
-              </Button>
-            </div>
-          </div>
-        </Card>
-      )}
-      
-      {records.length === 0 && !isAddingRecord ? (
+      {Array.isArray(records) && records.length === 0 ? (
         <Card className="p-8 text-center bg-card/60 backdrop-blur-sm rounded-3xl">
           <div className="flex flex-col items-center gap-2">
             <BookIcon size={48} className="text-muted-foreground mb-2" />
@@ -160,7 +45,7 @@ const Records: React.FC<RecordsProps> = ({ className }) => {
               Track your plants' growth and changes by taking photos and adding notes
             </p>
             <Button
-              onClick={handleStartCapture}
+              onClick={navigateToAddRecord}
               className="bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600"
             >
               <CameraIcon className="mr-2" />
@@ -169,13 +54,11 @@ const Records: React.FC<RecordsProps> = ({ className }) => {
           </div>
         </Card>
       ) : (
-        !isAddingRecord && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {records.map((record) => (
-              <RecordItem key={record.id} record={record} />
-            ))}
-          </div>
-        )
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Array.isArray(records) && records.map((record: PlantRecord) => (
+            <RecordItem key={record.id} record={record} />
+          ))}
+        </div>
       )}
     </div>
   );
