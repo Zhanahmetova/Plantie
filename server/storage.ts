@@ -7,6 +7,9 @@ import {
   plantRecords, type PlantRecord, type InsertPlantRecord
 } from "@shared/schema";
 
+import * as expressSession from "express-session";
+import { Store } from "express-session";
+
 export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
@@ -46,7 +49,16 @@ export interface IStorage {
   createPlantRecord(record: InsertPlantRecord): Promise<PlantRecord>;
   updatePlantRecord(id: number, record: Partial<PlantRecord>): Promise<PlantRecord | undefined>;
   deletePlantRecord(id: number): Promise<boolean>;
+
+  // Session management
+  sessionStore: Store;
 }
+
+import createMemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
+import { db } from "./db";
+
+const MemoryStore = createMemoryStore(expressSession);
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
@@ -55,6 +67,7 @@ export class MemStorage implements IStorage {
   private weatherPreferences: Map<number, WeatherPreference>;
   private plantIdentifications: Map<number, PlantIdentification>;
   private plantRecords: Map<number, PlantRecord>;
+  public sessionStore: Store;
   
   private currentUserId: number;
   private currentPlantId: number;
@@ -77,6 +90,11 @@ export class MemStorage implements IStorage {
     this.currentWeatherPreferenceId = 1;
     this.currentPlantIdentificationId = 1;
     this.currentPlantRecordId = 1;
+
+    // Initialize session store (memory store)
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000 // prune expired entries every 24h
+    }) as Store;
 
     // Add sample user
     this.createUser({ 

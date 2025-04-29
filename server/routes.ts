@@ -9,24 +9,35 @@ import {
   insertPlantRecordSchema
 } from "@shared/schema";
 import { z } from "zod";
-
-// Constants
-const DEMO_USER_ID = 1; // Since we're not implementing auth, we'll use a demo user
+import { setupAuth } from "./auth";
+import { Request, Response, NextFunction } from "express";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Set up authentication
+  setupAuth(app);
+
   // Set up API routes
   
+  // Middleware to ensure user is authenticated
+  const ensureAuthenticated = (req: Request, res: Response, next: NextFunction) => {
+    if (req.isAuthenticated()) {
+      return next();
+    }
+    res.status(401).json({ message: 'Unauthorized' });
+  };
+  
   // Plants API
-  app.get('/api/plants', async (req, res) => {
+  app.get('/api/plants', ensureAuthenticated, async (req, res) => {
     try {
-      const plants = await storage.getPlantsByUserId(DEMO_USER_ID);
+      const userId = req.user!.id;
+      const plants = await storage.getPlantsByUserId(userId);
       res.json(plants);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch plants' });
     }
   });
 
-  app.get('/api/plants/:id', async (req, res) => {
+  app.get('/api/plants/:id', ensureAuthenticated, async (req, res) => {
     try {
       const plantId = parseInt(req.params.id);
       if (isNaN(plantId)) {
@@ -38,17 +49,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Plant not found' });
       }
       
+      // Verify the plant belongs to the authenticated user
+      if (plant.userId !== req.user!.id) {
+        return res.status(403).json({ message: 'Not authorized to view this plant' });
+      }
+      
       res.json(plant);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch plant' });
     }
   });
 
-  app.post('/api/plants', async (req, res) => {
+  app.post('/api/plants', ensureAuthenticated, async (req, res) => {
     try {
+      const userId = req.user!.id;
       const parsedData = insertPlantSchema.parse({
         ...req.body,
-        userId: DEMO_USER_ID
+        userId
       });
       
       const plant = await storage.createPlant(parsedData);
@@ -61,7 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/plants/:id', async (req, res) => {
+  app.put('/api/plants/:id', ensureAuthenticated, async (req, res) => {
     try {
       const plantId = parseInt(req.params.id);
       if (isNaN(plantId)) {
@@ -73,7 +90,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Plant not found' });
       }
 
-      if (plant.userId !== DEMO_USER_ID) {
+      const userId = req.user!.id;
+      if (plant.userId !== userId) {
         return res.status(403).json({ message: 'Not authorized to update this plant' });
       }
 
@@ -84,7 +102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/plants/:id', async (req, res) => {
+  app.delete('/api/plants/:id', ensureAuthenticated, async (req, res) => {
     try {
       const plantId = parseInt(req.params.id);
       if (isNaN(plantId)) {
@@ -96,7 +114,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Plant not found' });
       }
 
-      if (plant.userId !== DEMO_USER_ID) {
+      const userId = req.user!.id;
+      if (plant.userId !== userId) {
         return res.status(403).json({ message: 'Not authorized to delete this plant' });
       }
 
@@ -108,25 +127,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tasks API
-  app.get('/api/tasks', async (req, res) => {
+  app.get('/api/tasks', ensureAuthenticated, async (req, res) => {
     try {
-      const tasks = await storage.getTasksByUserId(DEMO_USER_ID);
+      const userId = req.user!.id;
+      const tasks = await storage.getTasksByUserId(userId);
       res.json(tasks);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch tasks' });
     }
   });
 
-  app.get('/api/tasks/today', async (req, res) => {
+  app.get('/api/tasks/today', ensureAuthenticated, async (req, res) => {
     try {
-      const tasks = await storage.getTasksDueToday(DEMO_USER_ID);
+      const userId = req.user!.id;
+      const tasks = await storage.getTasksDueToday(userId);
       res.json(tasks);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch today\'s tasks' });
     }
   });
 
-  app.get('/api/plants/:id/tasks', async (req, res) => {
+  app.get('/api/plants/:id/tasks', ensureAuthenticated, async (req, res) => {
     try {
       const plantId = parseInt(req.params.id);
       if (isNaN(plantId)) {
@@ -138,7 +159,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Plant not found' });
       }
 
-      if (plant.userId !== DEMO_USER_ID) {
+      const userId = req.user!.id;
+      if (plant.userId !== userId) {
         return res.status(403).json({ message: 'Not authorized to view tasks for this plant' });
       }
 
@@ -149,16 +171,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/tasks', async (req, res) => {
+  app.post('/api/tasks', ensureAuthenticated, async (req, res) => {
     try {
+      const userId = req.user!.id;
       const parsedData = insertTaskSchema.parse({
         ...req.body,
-        userId: DEMO_USER_ID
+        userId
       });
       
       // Verify the plant exists and belongs to the user
       const plant = await storage.getPlant(parsedData.plantId);
-      if (!plant || plant.userId !== DEMO_USER_ID) {
+      if (!plant || plant.userId !== userId) {
         return res.status(404).json({ message: 'Plant not found or not owned by user' });
       }
 
@@ -172,7 +195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/tasks/:id', async (req, res) => {
+  app.put('/api/tasks/:id', ensureAuthenticated, async (req, res) => {
     try {
       const taskId = parseInt(req.params.id);
       if (isNaN(taskId)) {
@@ -184,7 +207,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Task not found' });
       }
 
-      if (task.userId !== DEMO_USER_ID) {
+      const userId = req.user!.id;
+      if (task.userId !== userId) {
         return res.status(403).json({ message: 'Not authorized to update this task' });
       }
 
@@ -195,7 +219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/tasks/:id', async (req, res) => {
+  app.delete('/api/tasks/:id', ensureAuthenticated, async (req, res) => {
     try {
       const taskId = parseInt(req.params.id);
       if (isNaN(taskId)) {
@@ -207,7 +231,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Task not found' });
       }
 
-      if (task.userId !== DEMO_USER_ID) {
+      const userId = req.user!.id;
+      if (task.userId !== userId) {
         return res.status(403).json({ message: 'Not authorized to delete this task' });
       }
 
@@ -219,9 +244,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Weather preferences API
-  app.get('/api/weather-preferences', async (req, res) => {
+  app.get('/api/weather-preferences', ensureAuthenticated, async (req, res) => {
     try {
-      const preferences = await storage.getWeatherPreferenceByUserId(DEMO_USER_ID);
+      const userId = req.user!.id;
+      const preferences = await storage.getWeatherPreferenceByUserId(userId);
       if (!preferences) {
         return res.status(404).json({ message: 'Weather preferences not found' });
       }
@@ -232,17 +258,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/weather-preferences', async (req, res) => {
+  app.post('/api/weather-preferences', ensureAuthenticated, async (req, res) => {
     try {
+      const userId = req.user!.id;
       // Check if preferences already exist
-      const existingPreferences = await storage.getWeatherPreferenceByUserId(DEMO_USER_ID);
+      const existingPreferences = await storage.getWeatherPreferenceByUserId(userId);
       if (existingPreferences) {
         return res.status(409).json({ message: 'Weather preferences already exist. Use PUT to update.' });
       }
       
       const parsedData = insertWeatherPreferenceSchema.parse({
         ...req.body,
-        userId: DEMO_USER_ID
+        userId
       });
       
       const preferences = await storage.createWeatherPreference(parsedData);
@@ -255,9 +282,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/weather-preferences', async (req, res) => {
+  app.put('/api/weather-preferences', ensureAuthenticated, async (req, res) => {
     try {
-      const updatedPreferences = await storage.updateWeatherPreference(DEMO_USER_ID, req.body);
+      const userId = req.user!.id;
+      const updatedPreferences = await storage.updateWeatherPreference(userId, req.body);
       
       if (!updatedPreferences) {
         return res.status(404).json({ message: 'Weather preferences not found' });
@@ -270,11 +298,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Plant identification API
-  app.post('/api/plant-identification', async (req, res) => {
+  app.post('/api/plant-identification', ensureAuthenticated, async (req, res) => {
     try {
+      const userId = req.user!.id;
       const parsedData = insertPlantIdentificationSchema.parse({
         ...req.body,
-        userId: DEMO_USER_ID
+        userId
       });
       
       const identification = await storage.createPlantIdentification(parsedData);
@@ -300,7 +329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/plant-identification/:id', async (req, res) => {
+  app.get('/api/plant-identification/:id', ensureAuthenticated, async (req, res) => {
     try {
       // Here you would have an endpoint to get the status/results of an identification
       res.json({ message: "Not implemented" });
@@ -310,16 +339,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Plant records API
-  app.get('/api/records', async (req, res) => {
+  app.get('/api/records', ensureAuthenticated, async (req, res) => {
     try {
-      const records = await storage.getPlantRecordsByUserId(DEMO_USER_ID);
+      const userId = req.user!.id;
+      const records = await storage.getPlantRecordsByUserId(userId);
       res.json(records);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch records' });
     }
   });
 
-  app.get('/api/plants/:id/records', async (req, res) => {
+  app.get('/api/plants/:id/records', ensureAuthenticated, async (req, res) => {
     try {
       const plantId = parseInt(req.params.id);
       if (isNaN(plantId)) {
@@ -331,7 +361,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Plant not found' });
       }
 
-      if (plant.userId !== DEMO_USER_ID) {
+      const userId = req.user!.id;
+      if (plant.userId !== userId) {
         return res.status(403).json({ message: 'Not authorized to view records for this plant' });
       }
 
@@ -342,7 +373,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/records/:id', async (req, res) => {
+  app.get('/api/records/:id', ensureAuthenticated, async (req, res) => {
     try {
       const recordId = parseInt(req.params.id);
       if (isNaN(recordId)) {
@@ -354,7 +385,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Record not found' });
       }
 
-      if (record.userId !== DEMO_USER_ID) {
+      const userId = req.user!.id;
+      if (record.userId !== userId) {
         return res.status(403).json({ message: 'Not authorized to view this record' });
       }
       
@@ -364,17 +396,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/records', async (req, res) => {
+  app.post('/api/records', ensureAuthenticated, async (req, res) => {
     try {
+      const userId = req.user!.id;
       const parsedData = insertPlantRecordSchema.parse({
         ...req.body,
-        userId: DEMO_USER_ID
+        userId
       });
       
       // If plantId is provided, verify it exists and belongs to user
       if (parsedData.plantId) {
         const plant = await storage.getPlant(parsedData.plantId);
-        if (!plant || plant.userId !== DEMO_USER_ID) {
+        if (!plant || plant.userId !== userId) {
           return res.status(404).json({ message: 'Plant not found or not owned by user' });
         }
       }
@@ -389,7 +422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/records/:id', async (req, res) => {
+  app.put('/api/records/:id', ensureAuthenticated, async (req, res) => {
     try {
       const recordId = parseInt(req.params.id);
       if (isNaN(recordId)) {
@@ -401,14 +434,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Record not found' });
       }
 
-      if (record.userId !== DEMO_USER_ID) {
+      const userId = req.user!.id;
+      if (record.userId !== userId) {
         return res.status(403).json({ message: 'Not authorized to update this record' });
       }
 
       // If plantId is provided, verify it exists and belongs to user
       if (req.body.plantId) {
         const plant = await storage.getPlant(req.body.plantId);
-        if (!plant || plant.userId !== DEMO_USER_ID) {
+        if (!plant || plant.userId !== userId) {
           return res.status(404).json({ message: 'Plant not found or not owned by user' });
         }
       }
@@ -420,7 +454,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/records/:id', async (req, res) => {
+  app.delete('/api/records/:id', ensureAuthenticated, async (req, res) => {
     try {
       const recordId = parseInt(req.params.id);
       if (isNaN(recordId)) {
@@ -432,7 +466,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Record not found' });
       }
 
-      if (record.userId !== DEMO_USER_ID) {
+      const userId = req.user!.id;
+      if (record.userId !== userId) {
         return res.status(403).json({ message: 'Not authorized to delete this record' });
       }
 

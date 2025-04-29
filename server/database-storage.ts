@@ -1,5 +1,9 @@
 import { eq, and, gte, lt } from 'drizzle-orm';
 import { db } from './db';
+import { pool } from './db';
+import * as expressSession from 'express-session';
+import { Store } from 'express-session';
+import connectPg from 'connect-pg-simple';
 import { 
   users, 
   plants, 
@@ -22,7 +26,17 @@ import {
 } from '@shared/schema';
 import { IStorage } from './storage';
 
+const PostgresSessionStore = connectPg(expressSession);
+
 export class DatabaseStorage implements IStorage {
+  public sessionStore: Store;
+
+  constructor() {
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true
+    });
+  }
   // User operations
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
