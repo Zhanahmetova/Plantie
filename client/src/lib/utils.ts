@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { format, isToday, isTomorrow, isYesterday } from "date-fns";
+import { format, isToday, isTomorrow, isYesterday, addDays as dateFnsAddDays } from "date-fns";
  
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -70,4 +70,10 @@ export function getRandomColor(): string {
   ];
   
   return colors[Math.floor(Math.random() * colors.length)];
+}
+
+export function addDays(date: Date | string | null, days: number): Date {
+  if (!date) return dateFnsAddDays(new Date(), days);
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  return dateFnsAddDays(dateObj, days);
 }
