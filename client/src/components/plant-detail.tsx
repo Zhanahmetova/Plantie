@@ -28,10 +28,25 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
   className
 }) => {
   const [, navigate] = useLocation();
-  const { data: records = [] } = usePlantRecords(plant.id);
-  const nextWateringDate = plant.lastWatered 
-    ? addDays(plant.lastWatered, plant.wateringFrequency) 
-    : addDays(new Date(), plant.wateringFrequency);
+  const { data: records = [], isLoading: isLoadingRecords } = usePlantRecords(plant.id);
+  
+  // Safely handle dates
+  const getNextWateringDate = () => {
+    try {
+      if (plant.lastWatered) {
+        const lastWateredDate = new Date(plant.lastWatered);
+        if (!isNaN(lastWateredDate.getTime())) {
+          return addDays(lastWateredDate, plant.wateringFrequency);
+        }
+      }
+      return addDays(new Date(), plant.wateringFrequency);
+    } catch (error) {
+      console.error("Error calculating next watering date:", error);
+      return new Date(); // Fallback to current date
+    }
+  };
+  
+  const nextWateringDate = getNextWateringDate();
   
   const handleAddRecord = () => {
     navigate(`/add-record?plantId=${plant.id}`);
@@ -109,21 +124,29 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
               <div className="bg-muted rounded-xl p-3">
                 <div className="flex flex-col items-center">
                   <SunIcon className="text-yellow-500 mb-1" size={20} />
-                  <span className="text-xs text-center">{plant.light}</span>
+                  <span className="text-xs text-center">
+                    {plant.light || 'Light not set'}
+                  </span>
                 </div>
               </div>
               
               <div className="bg-muted rounded-xl p-3">
                 <div className="flex flex-col items-center">
                   <HumidityIcon className="text-blue-500 mb-1" size={20} />
-                  <span className="text-xs text-center">{plant.humidity}</span>
+                  <span className="text-xs text-center">
+                    {plant.humidity || 'Humidity not set'}
+                  </span>
                 </div>
               </div>
               
               <div className="bg-muted rounded-xl p-3">
                 <div className="flex flex-col items-center">
                   <TemperatureIcon className="text-red-500 mb-1" size={20} />
-                  <span className="text-xs text-center">{plant.temperature.min}-{plant.temperature.max}°C</span>
+                  <span className="text-xs text-center">
+                    {plant.temperature && typeof plant.temperature === 'object' 
+                      ? `${plant.temperature.min}-${plant.temperature.max}°C`
+                      : 'Temperature not set'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -146,7 +169,24 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
             Growth History
           </h2>
           
-          {records.length === 0 ? (
+          {isLoadingRecords ? (
+            <div className="space-y-3">
+              {[1, 2].map((i) => (
+                <Card key={i} className="overflow-hidden animate-pulse">
+                  <div className="flex">
+                    <div className="w-24 h-24 bg-muted"></div>
+                    <div className="flex-1 p-3">
+                      <div className="space-y-2">
+                        <div className="h-4 bg-muted rounded-md w-3/4"></div>
+                        <div className="h-4 bg-muted rounded-md w-1/2"></div>
+                        <div className="h-4 bg-muted rounded-md w-1/4 ml-auto"></div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : records.length === 0 ? (
             <Card className="p-6 text-center">
               <p className="text-muted-foreground">No records yet. Add your first growth record.</p>
             </Card>

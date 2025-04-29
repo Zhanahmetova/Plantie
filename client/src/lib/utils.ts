@@ -6,33 +6,92 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(date: Date | string): string {
-  const dateObj = typeof date === "string" ? new Date(date) : date;
-  
-  if (isToday(dateObj)) {
-    return "Today";
-  } else if (isTomorrow(dateObj)) {
-    return "Tomorrow";
-  } else if (isYesterday(dateObj)) {
-    return "Yesterday";
+export function formatDate(date: Date | string | null): string {
+  if (!date) {
+    return "Not set";
   }
   
-  return format(dateObj, "MMM dd, yyyy");
+  try {
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    
+    // Check if date is valid
+    if (isNaN(dateObj.getTime())) {
+      return "Invalid date";
+    }
+    
+    if (isToday(dateObj)) {
+      return "Today";
+    } else if (isTomorrow(dateObj)) {
+      return "Tomorrow";
+    } else if (isYesterday(dateObj)) {
+      return "Yesterday";
+    }
+    
+    return format(dateObj, "MMM dd, yyyy");
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return "Invalid date";
+  }
 }
 
-export function formatShortDate(date: Date | string): string {
-  const dateObj = typeof date === "string" ? new Date(date) : date;
-  return format(dateObj, "MMM dd");
+export function formatShortDate(date: Date | string | null): string {
+  if (!date) {
+    return "Not set";
+  }
+  
+  try {
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    
+    // Check if date is valid
+    if (isNaN(dateObj.getTime())) {
+      return "Invalid date";
+    }
+    
+    return format(dateObj, "MMM dd");
+  } catch (error) {
+    console.error("Error formatting short date:", error);
+    return "Invalid date";
+  }
 }
 
-export function formatDayName(date: Date | string): string {
-  const dateObj = typeof date === "string" ? new Date(date) : date;
-  return format(dateObj, "EEE");
+export function formatDayName(date: Date | string | null): string {
+  if (!date) {
+    return "";
+  }
+  
+  try {
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    
+    // Check if date is valid
+    if (isNaN(dateObj.getTime())) {
+      return "";
+    }
+    
+    return format(dateObj, "EEE");
+  } catch (error) {
+    console.error("Error formatting day name:", error);
+    return "";
+  }
 }
 
-export function formatDayNumber(date: Date | string): string {
-  const dateObj = typeof date === "string" ? new Date(date) : date;
-  return format(dateObj, "dd");
+export function formatDayNumber(date: Date | string | null): string {
+  if (!date) {
+    return "";
+  }
+  
+  try {
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    
+    // Check if date is valid
+    if (isNaN(dateObj.getTime())) {
+      return "";
+    }
+    
+    return format(dateObj, "dd");
+  } catch (error) {
+    console.error("Error formatting day number:", error);
+    return "";
+  }
 }
 
 export function getDaysInWeek(startDate: Date = new Date()): Date[] {
@@ -74,6 +133,18 @@ export function getRandomColor(): string {
 
 export function addDays(date: Date | string | null, days: number): Date {
   if (!date) return dateFnsAddDays(new Date(), days);
-  const dateObj = typeof date === "string" ? new Date(date) : date;
-  return dateFnsAddDays(dateObj, days);
+  
+  try {
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    
+    // Check if date is valid
+    if (isNaN(dateObj.getTime())) {
+      return dateFnsAddDays(new Date(), days);
+    }
+    
+    return dateFnsAddDays(dateObj, days);
+  } catch (error) {
+    console.error("Error adding days to date:", error);
+    return dateFnsAddDays(new Date(), days);
+  }
 }
