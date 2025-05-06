@@ -30,6 +30,12 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
   const [, navigate] = useLocation();
   const { data: rawRecords = [], isLoading: isLoadingRecords } = usePlantRecords(plant.id);
   
+  // Log records for debugging
+  React.useEffect(() => {
+    console.log('Plant ID:', plant.id);
+    console.log('Raw Plant Records:', rawRecords);
+  }, [plant.id, rawRecords]);
+  
   // Sort records by date (newest first)
   const records = React.useMemo(() => {
     return [...rawRecords].sort((a, b) => {

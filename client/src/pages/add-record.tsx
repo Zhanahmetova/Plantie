@@ -24,15 +24,20 @@ const AddRecordPage: React.FC = () => {
 
   // Extract plant ID from URL query parameters if available
   useEffect(() => {
-    // Parse current URL for query parameters
-    const params = new URLSearchParams(location.split('?')[1]);
-    const plantIdParam = params.get('plantId');
-    
-    if (plantIdParam && plantIdParam !== 'undefined') {
-      const plantId = parseInt(plantIdParam, 10);
-      if (!isNaN(plantId)) {
-        setSelectedPlantId(plantId);
+    try {
+      // Parse current URL for query parameters
+      const params = new URLSearchParams(location.split('?')[1]);
+      const plantIdParam = params.get('plantId');
+      
+      if (plantIdParam && plantIdParam !== 'undefined') {
+        const plantId = parseInt(plantIdParam, 10);
+        if (!isNaN(plantId)) {
+          console.log('Setting plant ID from URL:', plantId);
+          setSelectedPlantId(plantId);
+        }
       }
+    } catch (error) {
+      console.error('Error parsing URL parameters:', error);
     }
   }, [location]);
 
@@ -72,8 +77,13 @@ const AddRecordPage: React.FC = () => {
         recordDate: formattedDate as string,
       });
       
-      // Navigate back to records page after success
-      navigate("/records");
+      // If we came from a plant detail page and have a plant ID, navigate back to that plant
+      // Otherwise go to the records page
+      if (selectedPlantId) {
+        navigate(`/plants/${selectedPlantId}`);
+      } else {
+        navigate("/records");
+      }
     } catch (error) {
       console.error("Failed to save record:", error);
       setIsSaving(false);

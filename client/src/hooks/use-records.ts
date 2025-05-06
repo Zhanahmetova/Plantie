@@ -11,10 +11,22 @@ export function useRecords() {
 export function usePlantRecords(plantId: number | null) {
   return useQuery({
     queryKey: ['/api/plants', plantId, 'records'],
-    queryFn: () => 
-      plantId 
-        ? apiRequest(`/api/plants/${plantId}/records`)
-        : Promise.resolve([]),
+    queryFn: async () => {
+      if (!plantId) {
+        console.log('No plant ID provided to usePlantRecords');
+        return [];
+      }
+      
+      console.log(`Fetching records for plant ID: ${plantId}`);
+      try {
+        const response = await apiRequest(`/api/plants/${plantId}/records`);
+        console.log(`Fetched ${response?.length || 0} records for plant ID: ${plantId}`, response);
+        return response || [];
+      } catch (error) {
+        console.error(`Error fetching records for plant ID: ${plantId}`, error);
+        return [];
+      }
+    },
     enabled: !!plantId,
   });
 }
