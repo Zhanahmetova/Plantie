@@ -43,12 +43,24 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+  password: text("password"),
+  email: text("email"),
+  googleId: text("google_id"),
+  displayName: text("display_name"),
+  profilePicture: text("profile_picture"),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
+});
+
+export const insertGoogleUserSchema = createInsertSchema(users).pick({
+  username: true,
+  email: true,
+  googleId: true,
+  displayName: true,
+  profilePicture: true,
 });
 
 // Weather Preference table
@@ -101,6 +113,7 @@ export const insertPlantRecordSchema = createInsertSchema(plantRecords).omit({
 // Type definitions
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type InsertGoogleUser = z.infer<typeof insertGoogleUserSchema>;
 
 export type Plant = typeof plants.$inferSelect;
 export type InsertPlant = z.infer<typeof insertPlantSchema>;
