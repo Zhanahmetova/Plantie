@@ -67,7 +67,12 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
   const nextWateringDate = getNextWateringDate();
   
   const handleAddRecord = () => {
-    navigate(`/add-record?plantId=${plant.id}`);
+    // Make sure plant.id is valid before adding it to the URL
+    if (plant && plant.id) {
+      navigate(`/add-record?plantId=${plant.id}`);
+    } else {
+      navigate('/add-record');
+    }
   };
   
   return (

@@ -11,7 +11,7 @@ import PageHeader from "@/components/ui/page-header";
 import { format } from "date-fns";
 
 const AddRecordPage: React.FC = () => {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const { data: plants = [] } = usePlants();
   const addRecord = useAddRecord();
   
@@ -21,6 +21,20 @@ const AddRecordPage: React.FC = () => {
   const [note, setNote] = useState("");
   const [recordDate, setRecordDate] = useState(new Date());
   const [isSaving, setIsSaving] = useState(false);
+
+  // Extract plant ID from URL query parameters if available
+  useEffect(() => {
+    // Parse current URL for query parameters
+    const params = new URLSearchParams(location.split('?')[1]);
+    const plantIdParam = params.get('plantId');
+    
+    if (plantIdParam && plantIdParam !== 'undefined') {
+      const plantId = parseInt(plantIdParam, 10);
+      if (!isNaN(plantId)) {
+        setSelectedPlantId(plantId);
+      }
+    }
+  }, [location]);
 
   // Start with camera open automatically
   useEffect(() => {
