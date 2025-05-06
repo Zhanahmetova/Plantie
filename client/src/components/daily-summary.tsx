@@ -6,17 +6,19 @@ import { LeafIcon, WateringCanIcon, MistingIcon } from "@/lib/icons";
 
 interface DailySummaryProps {
   className?: string;
+  selectedDate?: Date;
 }
 
 const DailySummary: React.FC<DailySummaryProps> = ({
-  className
+  className,
+  selectedDate = new Date()
 }) => {
   const { 
     wateringTasks, 
     mistingTasks,
     totalTasks,
     isLoading
-  } = useTasksByType();
+  } = useTasksByType(selectedDate);
   
   const [activeFilter, setActiveFilter] = useState<"all" | "watering" | "misting">("all");
   

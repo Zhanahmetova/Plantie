@@ -70,10 +70,10 @@ export function useDeleteTask() {
   });
 }
 
-export function useTasksByType() {
-  const { data: tasks, isLoading } = useTodayTasks();
+export function useTasksByType(selectedDate: Date = new Date()) {
+  const { data: allTasks, isLoading } = useTasks();
   
-  if (!tasks) {
+  if (!allTasks) {
     return {
       wateringTasks: [],
       mistingTasks: [],
@@ -83,6 +83,16 @@ export function useTasksByType() {
       isLoading
     };
   }
+  
+  // Filter tasks for the selected date
+  const tasks = allTasks.filter(task => {
+    const taskDate = new Date(task.dueDate);
+    return (
+      taskDate.getFullYear() === selectedDate.getFullYear() &&
+      taskDate.getMonth() === selectedDate.getMonth() &&
+      taskDate.getDate() === selectedDate.getDate()
+    );
+  });
   
   const wateringTasks = tasks.filter(task => task.type === "watering" && !task.completed);
   const mistingTasks = tasks.filter(task => task.type === "misting" && !task.completed);

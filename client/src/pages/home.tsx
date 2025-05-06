@@ -10,6 +10,12 @@ import { format } from "date-fns";
 const Home: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   
+  // Function to load tasks for the selected date
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+    // Additional tasks can be loaded here based on the selected date
+  };
+  
   return (
     <MainLayout>
       <div className="nature-bg min-h-screen relative">
@@ -37,11 +43,11 @@ const Home: React.FC = () => {
         
         <DatePicker 
           selectedDate={selectedDate}
-          onDateSelect={setSelectedDate}
+          onDateSelect={handleDateSelect}
           className="px-1 pb-1"
         />
         
-        <DailySummary className="mb-5" />
+        <DailySummary className="mb-5" selectedDate={selectedDate} />
         
         <WeatherCard className="mb-7" />
         

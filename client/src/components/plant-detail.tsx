@@ -33,16 +33,25 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
   // Safely handle dates
   const getNextWateringDate = () => {
     try {
+      // Check if lastWatered is valid
       if (plant.lastWatered) {
-        const lastWateredDate = new Date(plant.lastWatered);
-        if (!isNaN(lastWateredDate.getTime())) {
-          return addDays(lastWateredDate, plant.wateringFrequency);
+        // Convert to date object if it's a string
+        const lastWateredDate = typeof plant.lastWatered === 'string' 
+          ? new Date(plant.lastWatered) 
+          : plant.lastWatered;
+        
+        // Check if the conversion resulted in a valid date
+        if (lastWateredDate instanceof Date && !isNaN(lastWateredDate.getTime())) {
+          return addDays(lastWateredDate, plant.wateringFrequency || 7);
         }
       }
-      return addDays(new Date(), plant.wateringFrequency);
+      
+      // If lastWatered is null, undefined, or invalid date, use current date
+      return addDays(new Date(), plant.wateringFrequency || 7);
     } catch (error) {
       console.error("Error calculating next watering date:", error);
-      return new Date(); // Fallback to current date
+      // Fallback to current date + default 7 days watering frequency
+      return addDays(new Date(), 7);
     }
   };
   
