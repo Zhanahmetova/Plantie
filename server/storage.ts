@@ -1,5 +1,5 @@
 import { 
-  users, type User, type InsertUser,
+  users, type User, type InsertUser, type InsertGoogleUser,
   plants, type Plant, type InsertPlant,
   tasks, type Task, type InsertTask,
   weatherPreferences, type WeatherPreference, type InsertWeatherPreference,
@@ -14,7 +14,11 @@ export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByGoogleId(googleId: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  createGoogleUser(user: InsertGoogleUser): Promise<User>;
+  updateUser(id: number, userData: Partial<User>): Promise<User | undefined>;
 
   // Plant operations
   getPlant(id: number): Promise<Plant | undefined>;
@@ -221,12 +225,51 @@ export class MemStorage implements IStorage {
       (user) => user.username === username
     );
   }
+  
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.googleId === googleId
+    );
+  }
+  
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.email === email
+    );
+  }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      ...insertUser, 
+      id,
+      email: null,
+      googleId: null,
+      displayName: null,
+      profilePicture: null
+    };
     this.users.set(id, user);
     return user;
+  }
+  
+  async createGoogleUser(insertUser: InsertGoogleUser): Promise<User> {
+    const id = this.currentUserId++;
+    const user: User = { 
+      ...insertUser, 
+      id,
+      password: null
+    };
+    this.users.set(id, user);
+    return user;
+  }
+  
+  async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { ...user, ...userData };
+    this.users.set(id, updatedUser);
+    return updatedUser;
   }
 
   // Plant operations

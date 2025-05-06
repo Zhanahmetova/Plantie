@@ -1,11 +1,12 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User as SelectUser } from "@shared/schema";
+import { User as SelectUser, InsertGoogleUser } from "@shared/schema";
 
 declare global {
   namespace Express {
@@ -49,7 +50,7 @@ export function setupAuth(app: Express) {
     new LocalStrategy(async (username, password, done) => {
       try {
         const user = await storage.getUserByUsername(username);
-        if (!user || !(await comparePasswords(password, user.password))) {
+        if (!user || !user.password || !(await comparePasswords(password, user.password))) {
           return done(null, false, { message: "Invalid username or password" });
         } 
         return done(null, user);
@@ -58,6 +59,60 @@ export function setupAuth(app: Express) {
       }
     }),
   );
+  
+  // Google OAuth Strategy
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    passport.use(
+      new GoogleStrategy(
+        {
+          clientID: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          callbackURL: "/auth/google/callback",
+          scope: ["profile", "email"],
+        },
+        async (accessToken, refreshToken, profile, done) => {
+          try {
+            // Check if user already exists with this Google ID
+            let user = await storage.getUserByGoogleId(profile.id);
+            
+            if (!user) {
+              // Check if user exists with the same email
+              const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
+              if (email) {
+                user = await storage.getUserByEmail(email);
+              }
+              
+              if (!user) {
+                // Create new user from Google profile
+                const username = profile.displayName.toLowerCase().replace(/\s+/g, "_") + 
+                                 "_" + profile.id.substring(0, 5);
+                
+                user = await storage.createGoogleUser({
+                  username,
+                  email: email,
+                  googleId: profile.id,
+                  displayName: profile.displayName,
+                  profilePicture: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
+                });
+              } else {
+                // Update existing user with Google info
+                user = await storage.updateUser(user.id, {
+                  googleId: profile.id,
+                  profilePicture: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
+                });
+              }
+            }
+            
+            return done(null, user);
+          } catch (error) {
+            return done(error as Error);
+          }
+        }
+      )
+    );
+  } else {
+    console.warn('Google OAuth credentials not configured. Google login will not be available.');
+  }
 
   passport.serializeUser((user, done) => done(null, user.id));
   passport.deserializeUser(async (id: number, done) => {

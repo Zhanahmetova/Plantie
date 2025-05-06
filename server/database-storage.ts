@@ -12,7 +12,8 @@ import {
   plantIdentifications,
   plantRecords,
   type User, 
-  type InsertUser, 
+  type InsertUser,
+  type InsertGoogleUser,
   type Plant, 
   type InsertPlant, 
   type Task, 
@@ -47,8 +48,23 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db.select().from(users).where(eq(users.username, username));
     return user;
   }
+  
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.googleId, googleId));
+    return user;
+  }
+  
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+  
+  async createGoogleUser(insertUser: InsertGoogleUser): Promise<User> {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
