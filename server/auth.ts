@@ -16,17 +16,25 @@ declare global {
 
 const scryptAsync = promisify(scrypt);
 
-async function hashPassword(password: string) {
+export async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
   const buf = (await scryptAsync(password, salt, 64)) as Buffer;
   return `${buf.toString("hex")}.${salt}`;
 }
 
-async function comparePasswords(supplied: string, stored: string) {
+export async function comparePasswords(supplied: string, stored: string) {
   const [hashed, salt] = stored.split(".");
   const hashedBuf = Buffer.from(hashed, "hex");
   const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
   return timingSafeEqual(hashedBuf, suppliedBuf);
+}
+
+// Middleware to check if a user is authenticated
+export function isAuthenticated(req: any, res: any, next: any) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ message: "Not authenticated" });
 }
 
 export function setupAuth(app: Express) {
@@ -188,4 +196,36 @@ export function setupAuth(app: Express) {
       })
     );
   }
+  
+  // Change password endpoint
+  app.post("/api/user/change-password", isAuthenticated, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const userId = req.user!.id;
+      
+      // Get the user with their password
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.password) {
+        return res.status(400).json({ 
+          message: "Cannot change password for accounts without a password" 
+        });
+      }
+      
+      // Check if the current password is correct
+      const isCurrentPasswordValid = await comparePasswords(currentPassword, user.password);
+      if (!isCurrentPasswordValid) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+      
+      // Hash the new password and update the user
+      const hashedNewPassword = await hashPassword(newPassword);
+      await storage.updateUser(userId, { password: hashedNewPassword });
+      
+      res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Password change error:", error);
+      res.status(500).json({ message: "Failed to update password" });
+    }
+  });
 }

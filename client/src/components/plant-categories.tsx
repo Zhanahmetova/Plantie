@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import PlantCard from "@/components/ui/plant-card";
 import { usePlants } from "@/hooks/use-plants";
 import { AllPlantsIcon, IndoorIcon, SunIcon } from "@/lib/icons";
+import { Link } from "wouter";
 
 interface PlantCategoriesProps {
   className?: string;
@@ -50,7 +51,7 @@ const PlantCategories: React.FC<PlantCategoriesProps> = ({
     <div className={className}>
       <div className="flex justify-between items-center mb-3">
         <h2 className="font-semibold text-lg text-foreground">My Garden</h2>
-        <a href="#" className="text-primary text-sm">View All</a>
+        <Link href="/plants" className="text-primary text-sm">View All</Link>
       </div>
       
       <div className="flex space-x-3 mb-4 overflow-x-auto pb-2">
