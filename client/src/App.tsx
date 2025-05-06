@@ -18,6 +18,7 @@ const RecordsPage = lazy(() => import("@/pages/records"));
 const AddRecordPage = lazy(() => import("@/pages/add-record"));
 const AddPlantPage = lazy(() => import("@/pages/add-plant"));
 const PlantsPage = lazy(() => import("@/pages/plants"));
+const SettingsPage = lazy(() => import("@/pages/settings"));
 
 function Router() {
   return (
@@ -25,11 +26,10 @@ function Router() {
       <ProtectedRoute path="/" component={Home} />
       <ProtectedRoute path="/plants/:id" component={PlantDetailPage} />
       {/* Routes matching the new bottom navigation */}
-      <ProtectedRoute path="/favorites" component={() => <div className="p-4 text-center mt-12">Favorites page</div>} />
       <ProtectedRoute path="/add-plant" component={AddPlantPage} />
       <ProtectedRoute path="/records" component={RecordsPage} />
       <ProtectedRoute path="/add-record" component={AddRecordPage} />
-      <ProtectedRoute path="/settings" component={() => <div className="p-4 text-center mt-12">Settings page</div>} />
+      <ProtectedRoute path="/settings" component={SettingsPage} />
       {/* Legacy routes for compatibility */}
       <ProtectedRoute path="/identify" component={PlantIdentificationPage} />
       <ProtectedRoute path="/plants" component={PlantsPage} />

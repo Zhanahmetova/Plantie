@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import { Link, useLocation } from "wouter";
 import { 
   HomeIcon, 
-  HeartIcon, 
   PlusIcon, 
   BookIcon, 
   SettingsIcon 
@@ -47,22 +46,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
           </div>
         </Link>
         
-        <Link href="/favorites">
-          <div className="p-2 flex flex-col items-center cursor-pointer">
-            <div className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center",
-              isActive("/favorites") ? "bg-mint-light" : "bg-muted"
-            )}>
-              <HeartIcon className={isActive("/favorites") ? "text-accent-foreground" : "text-muted-foreground"} />
-            </div>
-            <span className={cn(
-              "text-xs mt-1",
-              isActive("/favorites") ? "text-foreground" : "text-muted-foreground"
-            )}>
-              Favorites
-            </span>
-          </div>
-        </Link>
+
         
         <Link href="/add-plant">
           <div className="p-2 flex flex-col items-center cursor-pointer">
