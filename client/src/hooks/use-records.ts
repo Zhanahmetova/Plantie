@@ -39,15 +39,30 @@ interface AddRecordInput {
 
 export function useAddRecord() {
   return useMutation({
-    mutationFn: (record: AddRecordInput) => 
-      apiRequest('/api/records', {
+    mutationFn: (record: AddRecordInput) => {
+      // Create a clean object without undefined or null values
+      const cleanRecord: Record<string, any> = {
+        image: record.image,
+      };
+      
+      // Only add optional fields if they have values
+      if (record.note) {
+        cleanRecord.note = record.note;
+      }
+      
+      if (record.plantId && record.plantId > 0) {
+        cleanRecord.plantId = record.plantId;
+      }
+      
+      if (record.recordDate) {
+        cleanRecord.recordDate = record.recordDate;
+      }
+      
+      return apiRequest('/api/records', {
         method: 'POST',
-        body: {
-          ...record,
-          // Convert plantId null to undefined so it's not sent to the API
-          plantId: record.plantId || undefined,
-        },
-      }),
+        body: cleanRecord,
+      });
+    },
     onSuccess: () => {
       // Invalidate records queries
       queryClient.invalidateQueries({ queryKey: ['/api/records'] });
@@ -71,15 +86,24 @@ interface UpdateRecordInput {
 
 export function useUpdateRecord() {
   return useMutation({
-    mutationFn: ({ id, ...data }: UpdateRecordInput) => 
-      apiRequest(`/api/records/${id}`, {
+    mutationFn: ({ id, ...data }: UpdateRecordInput) => {
+      // Create a clean object without undefined or null values
+      const cleanData: Record<string, any> = {};
+      
+      // Only add optional fields if they have values
+      if (data.note) {
+        cleanData.note = data.note;
+      }
+      
+      if (data.plantId && data.plantId > 0) {
+        cleanData.plantId = data.plantId;
+      }
+      
+      return apiRequest(`/api/records/${id}`, {
         method: 'PUT',
-        body: {
-          ...data,
-          // Convert plantId null to undefined so it's not sent to the API
-          plantId: data.plantId || undefined,
-        },
-      }),
+        body: cleanData,
+      });
+    },
     onSuccess: (_, variables) => {
       // Invalidate specific record and collections
       queryClient.invalidateQueries({ queryKey: ['/api/records', variables.id] });
