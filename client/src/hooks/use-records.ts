@@ -54,8 +54,12 @@ export function useAddRecord() {
         cleanRecord.plantId = record.plantId;
       }
       
+      // Ensure recordDate is sent as a Date object, not a string
       if (record.recordDate) {
-        cleanRecord.recordDate = record.recordDate;
+        // If it's already a Date, use it; otherwise create a new Date object
+        cleanRecord.recordDate = record.recordDate instanceof Date
+          ? record.recordDate
+          : new Date(record.recordDate);
       }
       
       return apiRequest('/api/records', {

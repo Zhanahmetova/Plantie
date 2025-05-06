@@ -108,6 +108,15 @@ export const plantRecords = pgTable("plant_records", {
 export const insertPlantRecordSchema = createInsertSchema(plantRecords).omit({
   id: true,
   createdAt: true,
+}).transform((data) => {
+  // Ensure recordDate is properly parsed as a Date if it's a string
+  if (data.recordDate && typeof data.recordDate === 'string') {
+    return {
+      ...data,
+      recordDate: new Date(data.recordDate)
+    };
+  }
+  return data;
 });
 
 // Type definitions
