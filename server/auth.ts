@@ -149,21 +149,21 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: Error | null, user: SelectUser | false, info: { message: string }) => {
       if (err) return next(err);
       if (!user) return res.status(401).json(info);
       
-      req.login(user, (err) => {
+      req.login(user, (err: Error | null) => {
         if (err) return next(err);
         // Don't send the password back to the client
-        const { password, ...userWithoutPassword } = user;
+        const { password, ...userWithoutPassword } = user as SelectUser;
         return res.status(200).json(userWithoutPassword);
       });
     })(req, res, next);
   });
 
   app.post("/api/logout", (req, res, next) => {
-    req.logout((err) => {
+    req.logout((err: Error | null) => {
       if (err) return next(err);
       res.status(200).json({ message: "Logged out successfully" });
     });
@@ -175,4 +175,17 @@ export function setupAuth(app: Express) {
     const { password, ...userWithoutPassword } = req.user as SelectUser;
     res.json(userWithoutPassword);
   });
+
+  // Google OAuth routes
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    app.get("/auth/google", passport.authenticate("google"));
+
+    app.get(
+      "/auth/google/callback",
+      passport.authenticate("google", { 
+        failureRedirect: "/auth?error=google-auth-failed",
+        successRedirect: "/"
+      })
+    );
+  }
 }
