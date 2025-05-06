@@ -28,7 +28,16 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
   className
 }) => {
   const [, navigate] = useLocation();
-  const { data: records = [], isLoading: isLoadingRecords } = usePlantRecords(plant.id);
+  const { data: rawRecords = [], isLoading: isLoadingRecords } = usePlantRecords(plant.id);
+  
+  // Sort records by date (newest first)
+  const records = React.useMemo(() => {
+    return [...rawRecords].sort((a, b) => {
+      const dateA = new Date(a.recordDate).getTime();
+      const dateB = new Date(b.recordDate).getTime();
+      return dateB - dateA; // Descending order (newest first)
+    });
+  }, [rawRecords]);
   
   // Safely handle dates
   const getNextWateringDate = () => {
@@ -173,15 +182,26 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
         
         {/* Growth Timeline */}
         <div className="mb-4">
-          <h2 className="text-lg font-medium mb-3 flex items-center gap-2">
-            <BookIcon size={20} />
-            Growth History
-          </h2>
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-lg font-medium flex items-center gap-2">
+              <BookIcon size={20} />
+              Growth History
+            </h2>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={handleAddRecord}
+              className="text-accent hover:text-accent/90 p-1 h-8"
+            >
+              <PlusIcon className="mr-1" size={16} />
+              Add
+            </Button>
+          </div>
           
           {isLoadingRecords ? (
             <div className="space-y-3">
               {[1, 2].map((i) => (
-                <Card key={i} className="overflow-hidden animate-pulse">
+                <Card key={i} className="overflow-hidden animate-pulse border border-border/50">
                   <div className="flex">
                     <div className="w-24 h-24 bg-muted"></div>
                     <div className="flex-1 p-3">
@@ -196,32 +216,52 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
               ))}
             </div>
           ) : records.length === 0 ? (
-            <Card className="p-6 text-center">
-              <p className="text-muted-foreground">No records yet. Add your first growth record.</p>
+            <Card className="p-6 text-center border border-dashed">
+              <div className="flex flex-col items-center justify-center py-8">
+                <CameraIcon className="w-12 h-12 text-muted-foreground mb-3" />
+                <p className="text-muted-foreground mb-3">No growth records yet</p>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleAddRecord}
+                  className="text-accent border-accent hover:bg-accent/10"
+                >
+                  <PlusIcon className="mr-1" size={16} />
+                  Add First Record
+                </Button>
+              </div>
             </Card>
           ) : (
             <div className="space-y-4">
-              {records.map((record: PlantRecord) => (
-                <Card key={record.id} className="overflow-hidden">
-                  <div className="flex">
-                    <div className="w-24 h-24 bg-muted">
-                      <img 
-                        src={record.image} 
-                        alt="Plant record" 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 p-3">
-                      <div className="flex justify-between">
-                        <p className="text-sm line-clamp-2">{record.note || "No notes"}</p>
-                        <p className="text-xs text-muted-foreground ml-2 whitespace-nowrap">
-                          {formatDate(record.recordDate)}
-                        </p>
+              {/* Timeline dots */}
+              <div className="relative">
+                <div className="absolute left-12 top-0 bottom-0 w-0.5 bg-gradient-to-b from-emerald-400 to-teal-500 z-0"></div>
+                <div className="space-y-6 relative z-10">
+                  {records.map((record: PlantRecord) => (
+                    <div key={record.id} className="flex">
+                      <div className="w-24 h-24 rounded-lg overflow-hidden border-4 border-white shadow-md relative">
+                        {/* Timeline dot */}
+                        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 z-20 shadow"></div>
+                        <img 
+                          src={record.image} 
+                          alt="Plant record" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 pl-4">
+                        <Card className="p-3 bg-card/80 backdrop-blur-sm shadow-sm border border-border/50">
+                          <div className="flex flex-col">
+                            <p className="text-xs font-medium text-accent mb-1">
+                              {formatDate(record.recordDate)}
+                            </p>
+                            <p className="text-sm">{record.note || "No notes"}</p>
+                          </div>
+                        </Card>
                       </div>
                     </div>
-                  </div>
-                </Card>
-              ))}
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>
