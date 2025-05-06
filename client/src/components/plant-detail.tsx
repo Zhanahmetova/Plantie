@@ -62,20 +62,20 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
   const getNextWateringDate = () => {
     try {
       // Check if lastWatered is valid
-      if (plant.lastWatered) {
+      if (plantData.lastWatered) {
         // Convert to date object if it's a string
-        const lastWateredDate = typeof plant.lastWatered === 'string' 
-          ? new Date(plant.lastWatered) 
-          : plant.lastWatered;
+        const lastWateredDate = typeof plantData.lastWatered === 'string' 
+          ? new Date(plantData.lastWatered) 
+          : plantData.lastWatered;
         
         // Check if the conversion resulted in a valid date
         if (lastWateredDate instanceof Date && !isNaN(lastWateredDate.getTime())) {
-          return addDays(lastWateredDate, plant.wateringFrequency || 7);
+          return addDays(lastWateredDate, plantData.wateringFrequency || 7);
         }
       }
       
       // If lastWatered is null, undefined, or invalid date, use current date
-      return addDays(new Date(), plant.wateringFrequency || 7);
+      return addDays(new Date(), plantData.wateringFrequency || 7);
     } catch (error) {
       console.error("Error calculating next watering date:", error);
       // Fallback to current date + default 7 days watering frequency
@@ -86,9 +86,9 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
   const nextWateringDate = getNextWateringDate();
   
   const handleAddRecord = () => {
-    // Make sure plant.id is valid before adding it to the URL
-    if (plant && plant.id) {
-      navigate(`/add-record?plantId=${plant.id}`);
+    // Make sure plantData.id is valid before adding it to the URL
+    if (plantData && plantData.id) {
+      navigate(`/add-record?plantId=${plantData.id}`);
     } else {
       navigate('/add-record');
     }
@@ -109,10 +109,10 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
         
         {/* Plant Image */}
         <div className="h-[300px] bg-mint-light flex items-center justify-center">
-          {plant.image ? (
+          {plantData.image ? (
             <img 
-              src={plant.image} 
-              alt={plant.name} 
+              src={plantData.image} 
+              alt={plantData.name} 
               className="h-full w-full object-cover"
             />
           ) : (
@@ -129,7 +129,7 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
 
       {/* Plant Information Section */}
       <div className="bg-white p-5 rounded-t-2xl -mt-6 relative z-10">
-        <h1 className="text-2xl font-bold mb-4">{plant.name}</h1>
+        <h1 className="text-2xl font-bold mb-4">{plantData.name}</h1>
         
         {/* Care Information */}
         <Card className="mb-6">
@@ -145,7 +145,7 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
                   <span className="text-sm">Last Watered</span>
                 </div>
                 <span className="text-sm font-medium">
-                  {formatDate(plant.lastWatered || new Date())}
+                  {formatDate(plantData.lastWatered || new Date())}
                 </span>
               </div>
               
@@ -167,7 +167,7 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
                 <div className="flex flex-col items-center">
                   <SunIcon className="text-yellow-500 mb-1" size={20} />
                   <span className="text-xs text-center">
-                    {plant.light || 'Light not set'}
+                    {plantData.light || 'Light not set'}
                   </span>
                 </div>
               </div>
@@ -176,7 +176,7 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
                 <div className="flex flex-col items-center">
                   <HumidityIcon className="text-blue-500 mb-1" size={20} />
                   <span className="text-xs text-center">
-                    {plant.humidity || 'Humidity not set'}
+                    {plantData.humidity || 'Humidity not set'}
                   </span>
                 </div>
               </div>
@@ -185,8 +185,8 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
                 <div className="flex flex-col items-center">
                   <TemperatureIcon className="text-red-500 mb-1" size={20} />
                   <span className="text-xs text-center">
-                    {plant.temperature && typeof plant.temperature === 'object' 
-                      ? `${plant.temperature.min}-${plant.temperature.max}°C`
+                    {plantData.temperature && typeof plantData.temperature === 'object' 
+                      ? `${plantData.temperature.min}-${plantData.temperature.max}°C`
                       : 'Temperature not set'}
                   </span>
                 </div>
@@ -291,10 +291,10 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
         </div>
         
         {/* Notes Section */}
-        {plant.notes && (
+        {plantData.notes && (
           <Card className="p-4">
             <h3 className="font-medium text-foreground mb-2">Notes</h3>
-            <p className="text-sm text-muted-foreground">{plant.notes}</p>
+            <p className="text-sm text-muted-foreground">{plantData.notes}</p>
           </Card>
         )}
       </div>
