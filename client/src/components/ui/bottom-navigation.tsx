@@ -46,8 +46,6 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
           </div>
         </Link>
         
-
-        
         <Link href="/add-plant">
           <div className="p-2 flex flex-col items-center cursor-pointer">
             <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center -mt-7 shadow-md">
