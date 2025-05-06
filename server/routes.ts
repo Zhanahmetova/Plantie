@@ -399,10 +399,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/records', ensureAuthenticated, async (req, res) => {
     try {
       const userId = req.user!.id;
-      const parsedData = insertPlantRecordSchema.parse({
-        ...req.body,
-        userId
-      });
+      
+      // Log received data for debugging
+      console.log('Record creation - received data:', JSON.stringify(req.body));
+      
+      // Prepare the data with special handling for dates
+      const cleanedData = { ...req.body, userId };
+      
+      // Add default recordDate if not provided
+      if (!cleanedData.recordDate) {
+        cleanedData.recordDate = new Date();
+      }
+      
+      // Special handling for recordDate if it's a string
+      if (cleanedData.recordDate && typeof cleanedData.recordDate === 'string') {
+        try {
+          console.log('Converting string date to Date object:', cleanedData.recordDate);
+          cleanedData.recordDate = new Date(cleanedData.recordDate);
+          // Check if we got a valid date
+          if (isNaN(cleanedData.recordDate.getTime())) {
+            throw new Error('Invalid date format');
+          }
+          console.log('Converted date:', cleanedData.recordDate);
+        } catch (err) {
+          console.error('Date conversion error:', err);
+          return res.status(400).json({ 
+            message: 'Invalid date format', 
+            errors: [{ path: ['recordDate'], message: 'Invalid date format' }] 
+          });
+        }
+      }
+      
+      const parsedData = insertPlantRecordSchema.parse(cleanedData);
       
       // If plantId is provided, verify it exists and belongs to user
       if (parsedData.plantId) {
@@ -415,6 +443,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const record = await storage.createPlantRecord(parsedData);
       res.status(201).json(record);
     } catch (error) {
+      console.error('Record creation error:', error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: 'Invalid record data', errors: error.errors });
       }

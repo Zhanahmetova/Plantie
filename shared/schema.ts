@@ -105,18 +105,20 @@ export const plantRecords = pgTable("plant_records", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const insertPlantRecordSchema = createInsertSchema(plantRecords).omit({
+// Custom date validation schema
+const dateSchema = z.preprocess((val) => {
+  if (typeof val === 'string' || val instanceof String) {
+    return new Date(val as string);
+  }
+  return val;
+}, z.date());
+
+// Replace the standard date schema in the record schema
+export const insertPlantRecordSchema = createInsertSchema(plantRecords, {
+  recordDate: () => dateSchema.optional().default(() => new Date())
+}).omit({
   id: true,
   createdAt: true,
-}).transform((data) => {
-  // Ensure recordDate is properly parsed as a Date if it's a string
-  if (data.recordDate && typeof data.recordDate === 'string') {
-    return {
-      ...data,
-      recordDate: new Date(data.recordDate)
-    };
-  }
-  return data;
 });
 
 // Type definitions

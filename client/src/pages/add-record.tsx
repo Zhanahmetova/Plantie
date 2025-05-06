@@ -46,11 +46,16 @@ const AddRecordPage: React.FC = () => {
     
     setIsSaving(true);
     try {
+      // Format the date to a standard ISO string for consistent parsing
+      const formattedDate = recordDate.toISOString();
+      
+      console.log('Sending record with date:', formattedDate);
+      
       await addRecord.mutateAsync({
         image: capturedImage,
         note: note.trim() ? note.trim() : undefined,
         plantId: selectedPlantId,
-        recordDate,
+        recordDate: formattedDate as string,
       });
       
       // Navigate back to records page after success

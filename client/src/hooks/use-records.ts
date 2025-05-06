@@ -34,7 +34,7 @@ interface AddRecordInput {
   image: string;
   note?: string;
   plantId?: number | null;
-  recordDate?: Date;
+  recordDate?: Date | string;
 }
 
 export function useAddRecord() {
