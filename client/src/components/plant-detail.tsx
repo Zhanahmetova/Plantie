@@ -28,13 +28,19 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
   className
 }) => {
   const [, navigate] = useLocation();
-  const { data: rawRecords = [], isLoading: isLoadingRecords } = usePlantRecords(plant.id);
+  
+  // Make sure plant.id is valid and numeric
+  const plantId = plant?.id ? Number(plant.id) : null;
+  
+  // Only fetch plant records if we have a valid plantId
+  const { data: rawRecords = [], isLoading: isLoadingRecords } = usePlantRecords(plantId);
   
   // Log records for debugging
   React.useEffect(() => {
-    console.log('Plant ID:', plant.id);
+    console.log('Plant ID for records:', plantId);
     console.log('Raw Plant Records:', rawRecords);
-  }, [plant.id, rawRecords]);
+    console.log('Plant object:', plant);
+  }, [plantId, rawRecords, plant]);
   
   // Sort records by date (newest first)
   const records = React.useMemo(() => {

@@ -20,9 +20,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Middleware to ensure user is authenticated
   const ensureAuthenticated = (req: Request, res: Response, next: NextFunction) => {
+    console.log(`Auth check for ${req.method} ${req.url}, authenticated: ${req.isAuthenticated()}`);
+    console.log(`User: ${req.user ? JSON.stringify(req.user) : 'None'}`);
+    
     if (req.isAuthenticated()) {
       return next();
     }
+    
+    console.log('Authentication failed, returning 401');
     res.status(401).json({ message: 'Unauthorized' });
   };
   
@@ -361,14 +366,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Plant not found' });
       }
 
+      // Log debugging information
+      console.log(`Getting records for plant ID: ${plantId}, requested by user ID: ${req.user?.id}`);
+      console.log(`Plant belongs to user ID: ${plant.userId}`);
+
       const userId = req.user!.id;
       if (plant.userId !== userId) {
         return res.status(403).json({ message: 'Not authorized to view records for this plant' });
       }
 
+      // Get all records for this plant
       const records = await storage.getPlantRecordsByPlantId(plantId);
+      console.log(`Found ${records.length} records for plant ID ${plantId}`);
+      
       res.json(records);
     } catch (error) {
+      console.error('Error fetching plant records:', error);
       res.status(500).json({ message: 'Failed to fetch records for plant' });
     }
   });
