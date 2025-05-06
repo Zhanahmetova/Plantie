@@ -7,7 +7,17 @@ import { usePlant } from "@/hooks/use-plants";
 const PlantDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const plantId = id ? parseInt(id) : null;
+  
+  // Add logging for debugging
+  console.log(`Plant Detail Page - URL param id: ${id}`);
+  console.log(`Plant Detail Page - Parsed plantId: ${plantId}`);
+  
   const { data: plant, isLoading } = usePlant(plantId);
+  
+  // Log plant data when it changes
+  React.useEffect(() => {
+    console.log("Plant Detail Page - Plant data:", plant);
+  }, [plant]);
   
   if (isLoading || !plant) {
     return (

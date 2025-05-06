@@ -29,8 +29,15 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
 }) => {
   const [, navigate] = useLocation();
   
-  // Make sure plant.id is valid and numeric
-  const plantId = plant?.id ? Number(plant.id) : null;
+  // Check if plant is an array and get the first item
+  const plantData = Array.isArray(plant) ? plant[0] : plant;
+  
+  // Make sure plantData.id is valid and numeric
+  const plantId = plantData && plantData.id ? Number(plantData.id) : null;
+  
+  console.log("PlantDetail component - plantId:", plantId);
+  console.log("PlantDetail component - plant:", plant);
+  console.log("PlantDetail component - plantData:", plantData);
   
   // Only fetch plant records if we have a valid plantId
   const { data: rawRecords = [], isLoading: isLoadingRecords } = usePlantRecords(plantId);

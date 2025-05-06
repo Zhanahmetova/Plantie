@@ -11,6 +11,22 @@ export function usePlants() {
 export function usePlant(id: number | null) {
   return useQuery<Plant>({
     queryKey: ["/api/plants", id],
+    queryFn: async () => {
+      if (!id) {
+        console.log("No plant ID provided to usePlant");
+        return null;
+      }
+      
+      console.log(`Fetching plant with ID: ${id}`);
+      try {
+        const response = await apiRequest(`/api/plants/${id}`);
+        console.log(`Fetched plant with ID: ${id}`, response);
+        return response;
+      } catch (error) {
+        console.error(`Error fetching plant with ID: ${id}`, error);
+        throw error;
+      }
+    },
     enabled: id !== null,
   });
 }
