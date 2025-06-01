@@ -25,9 +25,8 @@ export function useAddTask() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (task: Omit<Task, "id">) => {
-      const response = await apiRequest("POST", "/api/tasks", task);
-      return response.json();
+    mutationFn: async (task: Omit<Task, "id" | "createdAt" | "updatedAt">) => {
+      return await apiRequest("/api/tasks", { method: "POST", body: task });
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
@@ -41,15 +40,15 @@ export function useUpdateTask() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, task }: { id: number, task: Partial<Task> }) => {
-      const response = await apiRequest("PUT", `/api/tasks/${id}`, task);
-      return response.json();
+    mutationFn: async (task: { id: number } & Partial<Task>) => {
+      const { id, ...taskData } = task;
+      return await apiRequest(`/api/tasks/${id}`, { method: "PUT", body: taskData });
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
       queryClient.invalidateQueries({ queryKey: ["/api/tasks/today"] });
-      if (variables.task.plantId) {
-        queryClient.invalidateQueries({ queryKey: ["/api/plants", variables.task.plantId, "tasks"] });
+      if (variables.plantId) {
+        queryClient.invalidateQueries({ queryKey: ["/api/plants", variables.plantId, "tasks"] });
       }
     }
   });
@@ -60,7 +59,7 @@ export function useDeleteTask() {
   
   return useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/tasks/${id}`);
+      await apiRequest(`/api/tasks/${id}`, { method: "DELETE" });
       return id;
     },
     onSuccess: () => {
@@ -84,9 +83,9 @@ export function useTasksByType(selectedDate: Date = new Date()) {
     };
   }
   
-  // Filter tasks for the selected date
+  // Filter tasks for the selected date based on startDate
   const tasks = allTasks.filter(task => {
-    const taskDate = new Date(task.dueDate);
+    const taskDate = new Date(task.startDate);
     return (
       taskDate.getFullYear() === selectedDate.getFullYear() &&
       taskDate.getMonth() === selectedDate.getMonth() &&

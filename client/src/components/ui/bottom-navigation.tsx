@@ -5,7 +5,8 @@ import {
   HomeIcon, 
   PlusIcon, 
   BookIcon, 
-  SettingsIcon 
+  SettingsIcon,
+  TasksIcon
 } from "@/lib/icons";
 
 interface BottomNavigationProps {
@@ -60,19 +61,19 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
           </div>
         </Link>
         
-        <Link href="/records">
+        <Link href="/tasks">
           <div className="p-2 flex flex-col items-center cursor-pointer">
             <div className={cn(
               "w-10 h-10 rounded-full flex items-center justify-center",
-              isActive("/records") ? "bg-mint-light" : "bg-muted"
+              isActive("/tasks") ? "bg-mint-light" : "bg-muted"
             )}>
-              <BookIcon className={isActive("/records") ? "text-accent-foreground" : "text-muted-foreground"} />
+              <TasksIcon className={isActive("/tasks") ? "text-accent-foreground" : "text-muted-foreground"} />
             </div>
             <span className={cn(
               "text-xs mt-1",
-              isActive("/records") ? "text-foreground" : "text-muted-foreground"
+              isActive("/tasks") ? "text-foreground" : "text-muted-foreground"
             )}>
-              Records
+              Tasks
             </span>
           </div>
         </Link>

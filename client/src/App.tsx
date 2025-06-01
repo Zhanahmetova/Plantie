@@ -19,6 +19,9 @@ const AddRecordPage = lazy(() => import("@/pages/add-record"));
 const AddPlantPage = lazy(() => import("@/pages/add-plant"));
 const PlantsPage = lazy(() => import("@/pages/plants"));
 const SettingsPage = lazy(() => import("@/pages/settings"));
+const TasksPage = lazy(() => import("@/pages/tasks-page"));
+const AddTaskPage = lazy(() => import("@/pages/add-task"));
+const EditTaskPage = lazy(() => import("@/pages/edit-task"));
 
 function Router() {
   return (
@@ -29,6 +32,9 @@ function Router() {
       <ProtectedRoute path="/add-plant" component={AddPlantPage} />
       <ProtectedRoute path="/records" component={RecordsPage} />
       <ProtectedRoute path="/add-record" component={AddRecordPage} />
+      <ProtectedRoute path="/tasks" component={TasksPage} />
+      <ProtectedRoute path="/tasks/new" component={AddTaskPage} />
+      <ProtectedRoute path="/tasks/:id/edit" component={EditTaskPage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
       {/* Legacy routes for compatibility */}
       <ProtectedRoute path="/identify" component={PlantIdentificationPage} />

@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, json, varchar } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -28,15 +28,23 @@ export const insertPlantSchema = createInsertSchema(plants).omit({
 // Task table
 export const tasks = pgTable("tasks", {
   id: serial("id").primaryKey(),
-  type: text("type").notNull(), // watering, misting, fertilizing, etc.
   plantId: integer("plant_id").notNull(),
-  completed: boolean("completed").notNull().default(false),
-  dueDate: timestamp("due_date").notNull(),
+  type: text("type").notNull(), // 'watering' | 'misting' | 'fertilizing'
+  startDate: text("start_date").notNull(), // ISO format
+  completed: boolean("completed").default(false),
+  repeat: json("repeat").notNull(), // { type: 'everyNDays' | 'oneTime' | 'daily' | 'weekly', interval?: number, daysOfWeek?: string[] }
   userId: integer("user_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertTaskSchema = createInsertSchema(tasks).omit({
-  id: true,
+export const insertTaskSchema = createInsertSchema(tasks).pick({
+  plantId: true,
+  type: true,
+  startDate: true,
+  completed: true,
+  repeat: true,
+  userId: true,
 });
 
 // User table
