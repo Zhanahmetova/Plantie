@@ -800,6 +800,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Image is required" });
       }
 
+      // Debug logging to see what image data we're receiving
+      console.log('Received image data length:', image.length);
+      console.log('Image data preview:', image.substring(0, 100) + '...');
+      console.log('Image starts with data URL:', image.startsWith('data:'));
+
       // Perform plant identification and health analysis
       const { identifyPlant, analyzePlantHealth } = await import('./plant-analysis');
       
