@@ -53,7 +53,7 @@ const PlantCategories: React.FC<PlantCategoriesProps> = ({
         <h2 className="font-semibold text-lg text-foreground">My Garden</h2>
         <Link href="/plants" className="text-primary text-sm">View All</Link>
       </div>
-      <div className="flex space-x-3 mb-4 overflow-x-auto pb-2">
+      <div className="flex space-x-3 mb-4 overflow-x-auto pb-2 pl-[16px] pr-[16px]">
         <button 
           className="flex space-x-3 mb-4 overflow-x-auto ml-[6px] mr-[6px] bg-[transparent] pt-[0px] pb-[0px]"
           onClick={() => setActiveCategory("all")}
