@@ -24,6 +24,7 @@ const AddTaskPage = lazy(() => import("@/pages/add-task"));
 const EditTaskPage = lazy(() => import("@/pages/edit-task"));
 const NotificationsPage = lazy(() => import("@/pages/notifications"));
 const ARScanPage = lazy(() => import("@/pages/ar-scan"));
+const ScanResults = lazy(() => import("@/pages/scan-results"));
 
 function Router() {
   return (
@@ -39,6 +40,7 @@ function Router() {
       <ProtectedRoute path="/tasks/:id/edit" component={EditTaskPage} />
       <ProtectedRoute path="/notifications" component={NotificationsPage} />
       <ProtectedRoute path="/ar-scan" component={ARScanPage} />
+      <ProtectedRoute path="/scan-results/:scanId" component={ScanResults} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
       {/* Legacy routes for compatibility */}
       <ProtectedRoute path="/identify" component={PlantIdentificationPage} />

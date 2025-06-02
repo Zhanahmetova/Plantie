@@ -5,8 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { useLocation } from "wouter";
 
 interface PlantHealthResult {
+  scanId?: number;
   overallHealth: "excellent" | "good" | "fair" | "poor" | "critical";
   healthScore: number;
   issues: {
@@ -40,6 +42,7 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [, navigate] = useLocation();
 
   // Initialize camera
   useEffect(() => {
@@ -107,6 +110,11 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
       const result = await analyzePlantHealth(imageData);
       setScanResult(result);
       onScanComplete(result);
+      
+      // Navigate to results page after successful scan
+      if (result.scanId) {
+        navigate(`/scan-results/${result.scanId}`);
+      }
     } catch (err) {
       setError("Failed to analyze plant. Please try again.");
     } finally {
@@ -154,6 +162,7 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
       
       // Transform backend response to match frontend interface
       return {
+        scanId: result.id,
         overallHealth: result.overallHealth,
         healthScore: result.healthScore,
         issues: result.issues,
