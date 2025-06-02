@@ -784,7 +784,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = (req.user as any).id;
       const scans = await storage.getPlantHealthScansByUserId(userId);
-      res.json(scans);
+      
+      // Map database fields to frontend expected format for all scans
+      const mappedScans = scans.map(scan => ({
+        id: scan.id,
+        userId: scan.userId,
+        plantId: scan.plantId,
+        image: scan.imageUrl,
+        overallHealth: scan.overallHealth,
+        healthScore: scan.healthScore,
+        issues: scan.issues,
+        recommendations: scan.recommendations,
+        identifiedName: scan.identifiedName,
+        identifiedSpecies: scan.identifiedSpecies,
+        identificationConfidence: scan.identificationConfidence,
+        createdAt: scan.createdAt,
+        updatedAt: scan.updatedAt,
+      }));
+      
+      res.json(mappedScans);
     } catch (error) {
       console.error("Error fetching plant health scans:", error);
       res.status(500).json({ message: "Failed to fetch plant health scans" });
@@ -843,7 +861,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Plant health scan not found" });
       }
       
-      res.json(scan);
+      // Map database fields to frontend expected format
+      const mappedScan = {
+        id: scan.id,
+        userId: scan.userId,
+        plantId: scan.plantId,
+        image: scan.imageUrl,
+        overallHealth: scan.overallHealth,
+        healthScore: scan.healthScore,
+        issues: scan.issues,
+        recommendations: scan.recommendations,
+        identifiedName: scan.identifiedName,
+        identifiedSpecies: scan.identifiedSpecies,
+        identificationConfidence: scan.identificationConfidence,
+        createdAt: scan.createdAt,
+        updatedAt: scan.updatedAt,
+      };
+      
+      res.json(mappedScan);
     } catch (error) {
       console.error("Error fetching plant health scan:", error);
       res.status(500).json({ message: "Failed to fetch plant health scan" });
