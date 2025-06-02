@@ -8,6 +8,7 @@ import {
   SettingsIcon,
   TasksIcon,
 } from "@/lib/icons";
+import { Bell } from "lucide-react";
 
 interface BottomNavigationProps {
   className?: string;
@@ -66,6 +67,25 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ className }) => {
           </div>
         </Link>
 
+        <Link href="/notifications">
+          <div className="p-2 flex flex-col items-center cursor-pointer">
+            <div
+              className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center",
+                isActive("/notifications") ? "bg-mint-light" : "bg-muted",
+              )}
+            >
+              <Bell
+                className={
+                  isActive("/notifications")
+                    ? "text-accent-foreground"
+                    : "text-muted-foreground"
+                }
+              />
+            </div>
+          </div>
+        </Link>
+
         <Link href="/tasks">
           <div className="p-2 flex flex-col items-center cursor-pointer">
             <div
@@ -82,12 +102,6 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ className }) => {
                 }
               />
             </div>
-            {/* <span className={cn(
-              "text-xs mt-1",
-              isActive("/tasks") ? "text-foreground" : "text-muted-foreground"
-            )}>
-              Tasks
-            </span> */}
           </div>
         </Link>
 
