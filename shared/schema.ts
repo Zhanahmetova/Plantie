@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, text, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, text, integer, boolean, timestamp, json, jsonb, numeric, decimal } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -134,10 +134,10 @@ export const plantHealthScans = pgTable("plant_health_scans", {
   imageUrl: varchar("image_url").notNull(),
   overallHealth: varchar("overall_health").notNull(),
   healthScore: integer("health_score").notNull(),
-  identifiedPlantName: varchar("identified_plant_name"),
-  identifiedPlantSpecies: varchar("identified_plant_species"),
+  identifiedName: varchar("identified_name"),
+  identifiedSpecies: varchar("identified_species"),
   identificationConfidence: integer("identification_confidence"),
-  issues: json("issues").notNull().$type<{
+  issues: jsonb("issues").notNull().$type<{
     type: "disease" | "pest" | "nutrient" | "watering" | "light";
     severity: "low" | "medium" | "high";
     name: string;
@@ -145,7 +145,7 @@ export const plantHealthScans = pgTable("plant_health_scans", {
     treatment: string;
     confidence: number;
   }[]>(),
-  recommendations: json("recommendations").notNull().$type<string[]>(),
+  recommendations: text("recommendations").array().notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
