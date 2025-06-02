@@ -49,11 +49,10 @@ const PlantCategories: React.FC<PlantCategoriesProps> = ({
   
   return (
     <div className={className}>
-      <div className="flex justify-between items-center mb-3">
+      <div className="flex justify-between items-center mb-3 ml-[16px] mr-[16px]">
         <h2 className="font-semibold text-lg text-foreground">My Garden</h2>
         <Link href="/plants" className="text-primary text-sm">View All</Link>
       </div>
-      
       <div className="flex space-x-3 mb-4 overflow-x-auto pb-2">
         <button 
           className={cn(
@@ -92,7 +91,6 @@ const PlantCategories: React.FC<PlantCategoriesProps> = ({
           Outdoor
         </button>
       </div>
-      
       <div className="grid grid-cols-2 gap-3 mb-4">
         {filteredPlants?.map((plant) => (
           <PlantCard key={plant.id} plant={plant} />
