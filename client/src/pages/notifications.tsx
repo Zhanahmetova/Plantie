@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Bell, Check, CheckCheck, Trash2, Loader2 } from "lucide-react";
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead, useDeleteNotification } from "@/hooks/use-notifications";
 import { formatDistanceToNow } from "date-fns";
+import MainLayout from "@/components/layouts/main-layout";
 
 export default function NotificationsPage() {
   const { data: notifications, isLoading } = useNotifications();
@@ -15,18 +16,21 @@ export default function NotificationsPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-4">
-        <div className="flex items-center justify-center min-h-[200px]">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <MainLayout>
+        <div className="container mx-auto p-4">
+          <div className="flex items-center justify-center min-h-[200px]">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
         </div>
-      </div>
+      </MainLayout>
     );
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
+    <MainLayout>
+      <div className="container mx-auto p-4 max-w-4xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
           <Bell className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold">Notifications</h1>
           {unreadCount > 0 && (
@@ -138,6 +142,7 @@ export default function NotificationsPage() {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </MainLayout>
   );
 }

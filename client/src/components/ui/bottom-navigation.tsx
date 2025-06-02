@@ -56,6 +56,25 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ className }) => {
           </div>
         </Link>
 
+        <Link href="/tasks">
+          <div className="p-2 flex flex-col items-center cursor-pointer">
+            <div
+              className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center",
+                isActive("/tasks") ? "bg-mint-light" : "bg-muted",
+              )}
+            >
+              <TasksIcon
+                className={
+                  isActive("/tasks")
+                    ? "text-accent-foreground"
+                    : "text-muted-foreground"
+                }
+              />
+            </div>
+          </div>
+        </Link>
+
         <Link href="/add-plant">
           <div className="p-2 flex flex-col items-center cursor-pointer">
             <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-md mt-[-10px] mb-[-10px]">
@@ -78,25 +97,6 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ className }) => {
               <Bell
                 className={
                   isActive("/notifications")
-                    ? "text-accent-foreground"
-                    : "text-muted-foreground"
-                }
-              />
-            </div>
-          </div>
-        </Link>
-
-        <Link href="/tasks">
-          <div className="p-2 flex flex-col items-center cursor-pointer">
-            <div
-              className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center",
-                isActive("/tasks") ? "bg-mint-light" : "bg-muted",
-              )}
-            >
-              <TasksIcon
-                className={
-                  isActive("/tasks")
                     ? "text-accent-foreground"
                     : "text-muted-foreground"
                 }
