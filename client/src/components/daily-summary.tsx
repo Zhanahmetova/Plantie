@@ -38,16 +38,12 @@ const DailySummary: React.FC<DailySummaryProps> = ({
   }
   
   return (
-    <div className={cn(
-      "bg-white p-5 rounded-2xl shadow-sm",
-      className
-    )}>
+    <div className="bg-white p-5 rounded-2xl shadow-sm mb-5 ml-[16px] mr-[16px]">
       <div className="mb-4">
         <h2 className="font-semibold text-lg text-foreground">
           You have {totalTasks} tasks today
         </h2>
       </div>
-      
       <div className="flex space-x-2 mb-5 overflow-x-auto">
         <button 
           className={cn(
@@ -86,7 +82,6 @@ const DailySummary: React.FC<DailySummaryProps> = ({
           Misting
         </button>
       </div>
-      
       {/* Task Cards */}
       {(activeFilter === "all" || activeFilter === "watering") && wateringTasks.length > 0 && (
         <TaskCard
@@ -98,7 +93,6 @@ const DailySummary: React.FC<DailySummaryProps> = ({
           className="mb-3"
         />
       )}
-      
       {(activeFilter === "all" || activeFilter === "misting") && mistingTasks.length > 0 && (
         <TaskCard
           title="Plant Misting"
@@ -107,7 +101,6 @@ const DailySummary: React.FC<DailySummaryProps> = ({
           type="misting"
         />
       )}
-      
       {activeFilter !== "all" && (
         (activeFilter === "watering" && wateringTasks.length === 0) || 
         (activeFilter === "misting" && mistingTasks.length === 0)
@@ -116,7 +109,6 @@ const DailySummary: React.FC<DailySummaryProps> = ({
           No {activeFilter} tasks for today
         </div>
       )}
-      
       {activeFilter === "all" && totalTasks === 0 && (
         <div className="text-center py-6 text-muted-foreground rounded-xl bg-muted/30">
           No tasks for today

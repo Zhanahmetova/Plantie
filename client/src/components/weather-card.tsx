@@ -140,10 +140,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
   }
   
   return (
-    <div className={cn(
-      "bg-white p-5 rounded-2xl shadow-sm relative overflow-hidden",
-      className
-    )}>
+    <div className="bg-white p-5 rounded-2xl shadow-sm relative overflow-hidden mb-7 ml-[16px] mr-[16px]">
       <div className="flex justify-between items-start">
         <div>
           <p className="text-muted-foreground text-sm mb-1">
@@ -166,7 +163,6 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
           </p>
         </div>
       </div>
-      
       {/* Decorative Background */}
       <div className="absolute bottom-0 right-0 opacity-40 pointer-events-none">
         <svg 
@@ -188,7 +184,6 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
           />
         </svg>
       </div>
-      
       {/* Animated Sun Icon */}
       <div className="absolute top-4 right-16 opacity-20 pointer-events-none animate-pulse">
         <SunIcon size={40} className="text-yellow-500" />
