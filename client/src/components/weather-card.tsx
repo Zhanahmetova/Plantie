@@ -140,7 +140,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
   }
   
   return (
-    <div className="bg-white p-5 rounded-2xl shadow-sm relative overflow-hidden mb-7 ml-[16px] mr-[16px]">
+    <div className="bg-white p-5 rounded-2xl shadow-sm relative overflow-hidden mb-7 ml-[0px] mr-[0px]">
       <div className="flex justify-between items-start">
         <div>
           <p className="text-muted-foreground text-sm mb-1">
