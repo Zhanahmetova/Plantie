@@ -20,10 +20,10 @@ const Home: React.FC = () => {
     <MainLayout>
       <div className="nature-bg min-h-screen relative">
         {/* Decorative leaf elements */}
-        <div className="absolute top-28 right-2 opacity-10 rotate-45 pointer-events-none">
+        <div className="absolute top-5 right-2 opacity-10 rotate-45 pointer-events-none">
           <LeafIcon size={60} className="text-primary" />
         </div>
-        <div className="absolute bottom-20 left-2 opacity-10 -rotate-12 pointer-events-none">
+        <div className="absolute bottom-[33%] left-5 opacity-10 -rotate-12 pointer-events-none">
           <LeafIcon size={50} className="text-primary" />
         </div>
 
@@ -46,11 +46,13 @@ const Home: React.FC = () => {
           className="px-1 pb-1"
         />
 
-        <DailySummary className="mb-5" selectedDate={selectedDate} />
+        <div className="px-4">
+          <DailySummary className="mb-5" selectedDate={selectedDate} />
 
-        <WeatherCard className="mb-7" />
+          <WeatherCard className="mb-7" />
 
-        <PlantCategories />
+          <PlantCategories />
+        </div>
       </div>
     </MainLayout>
   );
