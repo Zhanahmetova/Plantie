@@ -14,6 +14,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useWeatherPreferences, useLocationPermission, useCreateWeatherPreference, useUpdateWeatherPreference } from "@/hooks/use-weather";
 
 const passwordChangeSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
@@ -31,6 +33,14 @@ const SettingsPage: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Weather settings
+  const { data: weatherPreferences } = useWeatherPreferences();
+  const { locationStatus, coordinates, requestLocation } = useLocationPermission();
+  const createPreferences = useCreateWeatherPreference();
+  const updatePreferences = useUpdateWeatherPreference();
+  const [manualLocation, setManualLocation] = useState("");
+  const [weatherUnit, setWeatherUnit] = useState<"metric" | "imperial">("metric");
 
   const form = useForm<PasswordChangeFormData>({
     resolver: zodResolver(passwordChangeSchema),
@@ -77,6 +87,61 @@ const SettingsPage: React.FC = () => {
     }
   };
 
+  const handleLocationRequest = async () => {
+    if (coordinates) {
+      try {
+        await apiRequest("/api/weather/coordinates", {
+          method: "POST",
+          body: { lat: coordinates.lat, lon: coordinates.lon, unit: weatherUnit }
+        });
+        toast({
+          title: "Location saved!",
+          description: "Your weather location has been updated",
+        });
+      } catch (error) {
+        toast({
+          title: "Failed to save location",
+          description: "Please try again",
+          variant: "destructive",
+        });
+      }
+    } else {
+      requestLocation();
+    }
+  };
+
+  const handleManualLocation = async () => {
+    if (!manualLocation.trim()) return;
+    
+    try {
+      if (weatherPreferences) {
+        await updatePreferences.mutateAsync({
+          location: manualLocation.trim(),
+          unit: weatherUnit
+        });
+      } else {
+        await createPreferences.mutateAsync({
+          userId: 0, // This will be set by the server
+          location: manualLocation.trim(),
+          unit: weatherUnit
+        });
+      }
+      
+      toast({
+        title: "Location saved!",
+        description: "Your weather location has been updated",
+      });
+      
+      setManualLocation("");
+    } catch (error) {
+      toast({
+        title: "Failed to save location",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <MainLayout>
       <div className="p-4 space-y-5">
@@ -97,6 +162,77 @@ const SettingsPage: React.FC = () => {
               <Label>Email</Label>
               <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
                 {user?.email || "No email set"}
+              </div>
+            </div>
+          </div>
+        </Card>
+        
+        <Card className="p-5">
+          <h2 className="text-xl font-semibold mb-1">Weather Settings</h2>
+          <p className="text-sm text-muted-foreground mb-4">Manage your weather location and preferences</p>
+          
+          <Separator className="mb-4" />
+          
+          <div className="space-y-4">
+            {weatherPreferences && (
+              <div className="flex flex-col space-y-2">
+                <Label>Current Location</Label>
+                <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
+                  {weatherPreferences.location}
+                </div>
+                <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
+                  Unit: {weatherPreferences.unit === "metric" ? "Celsius" : "Fahrenheit"}
+                </div>
+              </div>
+            )}
+            
+            <div className="space-y-3">
+              <Label>Update Location</Label>
+              
+              {locationStatus === 'not-requested' && (
+                <Button onClick={handleLocationRequest} className="w-full">
+                  Use My Current Location
+                </Button>
+              )}
+              
+              {locationStatus === 'requesting' && (
+                <div className="text-sm text-muted-foreground p-2 bg-muted rounded">
+                  Requesting location access...
+                </div>
+              )}
+              
+              {locationStatus === 'granted' && coordinates && (
+                <Button onClick={handleLocationRequest} className="w-full">
+                  Save Current Location
+                </Button>
+              )}
+              
+              <div className="space-y-2">
+                <Label>Or enter manually:</Label>
+                <Input
+                  placeholder="City, Country (e.g., London, UK)"
+                  value={manualLocation}
+                  onChange={(e) => setManualLocation(e.target.value)}
+                  className="w-full"
+                />
+                <div className="flex gap-2">
+                  <Select value={weatherUnit} onValueChange={(value) => setWeatherUnit(value as "metric" | "imperial")}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="metric">Celsius</SelectItem>
+                      <SelectItem value="imperial">Fahrenheit</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    onClick={handleManualLocation} 
+                    disabled={!manualLocation.trim() || createPreferences.isPending || updatePreferences.isPending}
+                    className="flex-1"
+                  >
+                    {createPreferences.isPending || updatePreferences.isPending ? "Saving..." : "Save Location"}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

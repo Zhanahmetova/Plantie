@@ -165,12 +165,6 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
             {weather?.location}
           </p>
         </div>
-        <button 
-          onClick={() => setShowLocationSetup(true)}
-          className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-full px-4 py-1.5 text-sm flex items-center transition-colors"
-        >
-          <PlusCircleIcon size={16} className="mr-1.5" /> Setup
-        </button>
       </div>
       
       {/* Decorative Background */}
