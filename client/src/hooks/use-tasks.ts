@@ -78,10 +78,16 @@ export function useTasksByType(selectedDate: Date = new Date()) {
       mistingTasks: [],
       fertilizingTasks: [],
       otherTasks: [],
+      completedTasks: [],
+      forgottenTasks: [],
       totalTasks: 0,
       isLoading
     };
   }
+  
+  const today = new Date();
+  const isToday = selectedDate.toDateString() === today.toDateString();
+  const isPastDate = selectedDate < today;
   
   // Filter tasks for the selected date based on startDate
   const tasks = allTasks.filter(task => {
@@ -93,24 +99,43 @@ export function useTasksByType(selectedDate: Date = new Date()) {
     );
   });
   
-  const wateringTasks = tasks.filter(task => task.type === "watering" && !task.completed);
-  const mistingTasks = tasks.filter(task => task.type === "misting" && !task.completed);
-  const fertilizingTasks = tasks.filter(task => task.type === "fertilizing" && !task.completed);
-  const otherTasks = tasks.filter(task => 
-    !["watering", "misting", "fertilizing"].includes(task.type) && !task.completed
-  );
+  // For current/future dates: show only incomplete tasks
+  // For past dates: show completed and forgotten (incomplete past due) tasks
+  let wateringTasks: Task[], mistingTasks: Task[], fertilizingTasks: Task[], otherTasks: Task[], completedTasks: Task[], forgottenTasks: Task[];
+  
+  if (isToday || selectedDate > today) {
+    // Current or future date - show incomplete tasks only
+    wateringTasks = tasks.filter(task => task.type === "watering" && !task.completed);
+    mistingTasks = tasks.filter(task => task.type === "misting" && !task.completed);
+    fertilizingTasks = tasks.filter(task => task.type === "fertilizing" && !task.completed);
+    otherTasks = tasks.filter(task => 
+      !["watering", "misting", "fertilizing"].includes(task.type) && !task.completed
+    );
+    completedTasks = [];
+    forgottenTasks = [];
+  } else {
+    // Past date - show completed and forgotten tasks
+    completedTasks = tasks.filter(task => task.completed);
+    forgottenTasks = tasks.filter(task => !task.completed); // These are forgotten since they're past due
+    
+    wateringTasks = completedTasks.filter(task => task.type === "watering");
+    mistingTasks = completedTasks.filter(task => task.type === "misting");
+    fertilizingTasks = completedTasks.filter(task => task.type === "fertilizing");
+    otherTasks = completedTasks.filter(task => 
+      !["watering", "misting", "fertilizing"].includes(task.type)
+    );
+  }
   
   return {
     wateringTasks,
     mistingTasks,
     fertilizingTasks,
     otherTasks,
-    totalTasks: [
-      ...wateringTasks,
-      ...mistingTasks,
-      ...fertilizingTasks,
-      ...otherTasks
-    ].length,
+    completedTasks,
+    forgottenTasks,
+    totalTasks: tasks.length,
+    isToday,
+    isPastDate,
     isLoading
   };
 }

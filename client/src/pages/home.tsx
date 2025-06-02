@@ -43,7 +43,7 @@ const Home: React.FC = () => {
         <DatePicker
           selectedDate={selectedDate}
           onDateSelect={handleDateSelect}
-          className="px-1 pb-1"
+          className="pb-1"
         />
 
         <div className="px-4">

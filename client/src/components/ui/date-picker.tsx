@@ -11,47 +11,55 @@ interface DatePickerProps {
 const DatePicker: React.FC<DatePickerProps> = ({
   selectedDate,
   onDateSelect,
-  className
+  className,
 }) => {
   const daysOfWeek = useMemo(() => getDaysInWeek(selectedDate), [selectedDate]);
-  
+
   const isSelected = (date: Date) => {
-    return date.getDate() === selectedDate.getDate() && 
-           date.getMonth() === selectedDate.getMonth() && 
-           date.getFullYear() === selectedDate.getFullYear();
+    return (
+      date.getDate() === selectedDate.getDate() &&
+      date.getMonth() === selectedDate.getMonth() &&
+      date.getFullYear() === selectedDate.getFullYear()
+    );
   };
-  
+
   const isToday = (date: Date) => {
     const today = new Date();
-    return date.getDate() === today.getDate() && 
-           date.getMonth() === today.getMonth() && 
-           date.getFullYear() === today.getFullYear();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
   };
-  
+
   return (
     <div className={cn("date-picker py-3", className)}>
-      <div className="flex space-x-3 mb-4 overflow-x-auto pt-[8px] pb-[8px]">
+      <div className="flex space-x-3 mb-4 pr-4 overflow-x-auto pt-[8px] pb-[8px]">
         {daysOfWeek.map((date, index) => (
           <button
             key={index}
             className={cn(
-              "date-item min-w-[60px] h-[75px] rounded-2xl flex flex-col items-center justify-center p-2 transition-all shadow-sm",
-              isSelected(date) 
-                ? "bg-primary text-white scale-110" 
-                : "bg-white text-foreground hover:bg-primary/10"
+              "date-item min-w-[60px] h-[75px] rounded-2xl flex flex-col items-center justify-center p-2 transition-all shadow-sm first:ml-4",
+              isSelected(date)
+                ? "bg-primary text-white scale-110"
+                : "bg-white text-foreground hover:bg-primary/10",
             )}
             onClick={() => onDateSelect(date)}
           >
-            <p className={cn(
-              "text-xs mb-1.5",
-              isSelected(date) ? "text-white" : "text-muted-foreground"
-            )}>
+            <p
+              className={cn(
+                "text-xs mb-1.5",
+                isSelected(date) ? "text-white" : "text-muted-foreground",
+              )}
+            >
               {formatDayName(date)}
             </p>
-            <p className={cn(
-              "text-lg font-medium",
-              isSelected(date) ? "text-white" : "text-foreground"
-            )}>
+            <p
+              className={cn(
+                "text-lg font-medium",
+                isSelected(date) ? "text-white" : "text-foreground",
+              )}
+            >
               {formatDayNumber(date)}
             </p>
             {isToday(date) && !isSelected(date) && (

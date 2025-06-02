@@ -13,11 +13,19 @@ const DailySummary: React.FC<DailySummaryProps> = ({
   className,
   selectedDate = new Date(),
 }) => {
-  const { wateringTasks, mistingTasks, totalTasks, isLoading } =
-    useTasksByType(selectedDate);
+  const { 
+    wateringTasks, 
+    mistingTasks, 
+    totalTasks, 
+    completedTasks, 
+    forgottenTasks, 
+    isToday, 
+    isPastDate, 
+    isLoading 
+  } = useTasksByType(selectedDate);
 
   const [activeFilter, setActiveFilter] = useState<
-    "all" | "watering" | "misting"
+    "all" | "watering" | "misting" | "completed" | "forgotten"
   >("all");
 
   if (isLoading) {
@@ -37,11 +45,19 @@ const DailySummary: React.FC<DailySummaryProps> = ({
     );
   }
 
+  const getTaskSummaryText = () => {
+    if (isPastDate) {
+      return `${completedTasks.length} completed, ${forgottenTasks.length} forgotten tasks`;
+    } else {
+      return `You have ${totalTasks} tasks`;
+    }
+  };
+
   return (
     <div className="bg-white p-5 rounded-2xl shadow-sm mb-5 ml-[0px] mr-[0px]">
       <div className="mb-4">
         <h2 className="font-semibold text-lg text-foreground">
-          You have {totalTasks} tasks
+          {getTaskSummaryText()}
         </h2>
       </div>
       <div className="flex space-x-2 mb-5 overflow-x-auto">
@@ -57,30 +73,62 @@ const DailySummary: React.FC<DailySummaryProps> = ({
           <LeafIcon size={16} className="mr-2" />
           All
         </button>
-        <button
-          className={cn(
-            "px-5 py-2.5 rounded-full text-sm font-medium flex items-center whitespace-nowrap transition-colors",
-            activeFilter === "watering"
-              ? "bg-primary text-white"
-              : "bg-muted text-foreground",
-          )}
-          onClick={() => setActiveFilter("watering")}
-        >
-          <WateringCanIcon size={16} className="mr-2" />
-          Watering
-        </button>
-        <button
-          className={cn(
-            "px-5 py-2.5 rounded-full text-sm font-medium flex items-center whitespace-nowrap transition-colors",
-            activeFilter === "misting"
-              ? "bg-primary text-white"
-              : "bg-muted text-foreground",
-          )}
-          onClick={() => setActiveFilter("misting")}
-        >
-          <MistingIcon size={16} className="mr-2" />
-          Misting
-        </button>
+        
+        {isPastDate ? (
+          <>
+            <button
+              className={cn(
+                "px-5 py-2.5 rounded-full text-sm font-medium flex items-center whitespace-nowrap transition-colors",
+                activeFilter === "completed"
+                  ? "bg-green-600 text-white"
+                  : "bg-muted text-foreground",
+              )}
+              onClick={() => setActiveFilter("completed")}
+            >
+              <CheckCircleIcon size={16} className="mr-2" />
+              Completed ({completedTasks.length})
+            </button>
+            <button
+              className={cn(
+                "px-5 py-2.5 rounded-full text-sm font-medium flex items-center whitespace-nowrap transition-colors",
+                activeFilter === "forgotten"
+                  ? "bg-red-600 text-white"
+                  : "bg-muted text-foreground",
+              )}
+              onClick={() => setActiveFilter("forgotten")}
+            >
+              <XCircleIcon size={16} className="mr-2" />
+              Forgotten ({forgottenTasks.length})
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              className={cn(
+                "px-5 py-2.5 rounded-full text-sm font-medium flex items-center whitespace-nowrap transition-colors",
+                activeFilter === "watering"
+                  ? "bg-primary text-white"
+                  : "bg-muted text-foreground",
+              )}
+              onClick={() => setActiveFilter("watering")}
+            >
+              <WateringCanIcon size={16} className="mr-2" />
+              Watering
+            </button>
+            <button
+              className={cn(
+                "px-5 py-2.5 rounded-full text-sm font-medium flex items-center whitespace-nowrap transition-colors",
+                activeFilter === "misting"
+                  ? "bg-primary text-white"
+                  : "bg-muted text-foreground",
+              )}
+              onClick={() => setActiveFilter("misting")}
+            >
+              <MistingIcon size={16} className="mr-2" />
+              Misting
+            </button>
+          </>
+        )}
       </div>
       {/* Task Cards */}
       {(activeFilter === "all" || activeFilter === "watering") &&
