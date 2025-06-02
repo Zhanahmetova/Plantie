@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import TaskCard from "@/components/ui/task-card";
 import { useTasksByType } from "@/hooks/use-tasks";
 import { LeafIcon, WateringCanIcon, MistingIcon } from "@/lib/icons";
+import { CheckCircle as CheckCircleIcon, XCircle as XCircleIcon } from "lucide-react";
 
 interface DailySummaryProps {
   className?: string;
@@ -131,37 +132,97 @@ const DailySummary: React.FC<DailySummaryProps> = ({
         )}
       </div>
       {/* Task Cards */}
-      {(activeFilter === "all" || activeFilter === "watering") &&
-        wateringTasks.length > 0 && (
-          <TaskCard
-            title="Plant Watering"
-            description={`${wateringTasks.length} Plants need watering`}
-            progress={80}
-            type="watering"
-            active={true}
-            className="mb-3"
-          />
-        )}
-      {(activeFilter === "all" || activeFilter === "misting") &&
-        mistingTasks.length > 0 && (
-          <TaskCard
-            title="Plant Misting"
-            description={`${mistingTasks.length} Plants need misting`}
-            progress={60}
-            type="misting"
-          />
-        )}
-      {activeFilter !== "all" &&
-        ((activeFilter === "watering" && wateringTasks.length === 0) ||
-          (activeFilter === "misting" && mistingTasks.length === 0)) && (
-          <div className="text-center py-6 text-muted-foreground rounded-xl bg-muted/30">
-            No {activeFilter} tasks for today
-          </div>
-        )}
-      {activeFilter === "all" && totalTasks === 0 && (
-        <div className="text-center py-6 text-muted-foreground rounded-xl bg-muted/30">
-          No tasks for today
-        </div>
+      {isPastDate ? (
+        // Past date: show completed and forgotten tasks
+        <>
+          {(activeFilter === "all" || activeFilter === "completed") &&
+            completedTasks.length > 0 && (
+              <div className="space-y-3">
+                {activeFilter === "all" && (
+                  <h3 className="text-sm font-medium text-green-600">Completed Tasks</h3>
+                )}
+                {wateringTasks.length > 0 && (
+                  <TaskCard
+                    title="Plant Watering"
+                    description={`${wateringTasks.length} Plants watered`}
+                    progress={100}
+                    type="watering"
+                    completed={true}
+                    className="mb-3"
+                  />
+                )}
+                {mistingTasks.length > 0 && (
+                  <TaskCard
+                    title="Plant Misting"
+                    description={`${mistingTasks.length} Plants misted`}
+                    progress={100}
+                    type="misting"
+                    completed={true}
+                    className="mb-3"
+                  />
+                )}
+              </div>
+            )}
+
+          {(activeFilter === "all" || activeFilter === "forgotten") &&
+            forgottenTasks.length > 0 && (
+              <div className="space-y-3">
+                {activeFilter === "all" && (
+                  <h3 className="text-sm font-medium text-red-600 mt-4">Forgotten Tasks</h3>
+                )}
+                <TaskCard
+                  title="Missed Care Tasks"
+                  description={`${forgottenTasks.length} tasks were not completed`}
+                  progress={0}
+                  type="forgotten"
+                  className="mb-3 border-red-200 bg-red-50"
+                />
+              </div>
+            )}
+
+          {totalTasks === 0 && (
+            <div className="text-center py-6 text-muted-foreground rounded-xl bg-muted/30">
+              No tasks scheduled for this date
+            </div>
+          )}
+        </>
+      ) : (
+        // Current/future date: show incomplete tasks
+        <>
+          {(activeFilter === "all" || activeFilter === "watering") &&
+            wateringTasks.length > 0 && (
+              <TaskCard
+                title="Plant Watering"
+                description={`${wateringTasks.length} Plants need watering`}
+                progress={80}
+                type="watering"
+                active={true}
+                className="mb-3"
+              />
+            )}
+          {(activeFilter === "all" || activeFilter === "misting") &&
+            mistingTasks.length > 0 && (
+              <TaskCard
+                title="Plant Misting"
+                description={`${mistingTasks.length} Plants need misting`}
+                progress={60}
+                type="misting"
+                className="mb-3"
+              />
+            )}
+          {activeFilter !== "all" &&
+            ((activeFilter === "watering" && wateringTasks.length === 0) ||
+              (activeFilter === "misting" && mistingTasks.length === 0)) && (
+              <div className="text-center py-6 text-muted-foreground rounded-xl bg-muted/30">
+                No {activeFilter} tasks for today
+              </div>
+            )}
+          {activeFilter === "all" && totalTasks === 0 && (
+            <div className="text-center py-6 text-muted-foreground rounded-xl bg-muted/30">
+              No tasks for today
+            </div>
+          )}
+        </>
       )}
     </div>
   );
