@@ -30,7 +30,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   
   return (
     <div className={cn("date-picker py-3", className)}>
-      <div className="flex space-x-3 mb-4 overflow-x-auto pb-1">
+      <div className="flex space-x-3 mb-4 overflow-x-auto pt-[8px] pb-[8px]">
         {daysOfWeek.map((date, index) => (
           <button
             key={index}
