@@ -16,6 +16,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useWeatherPreferences, useLocationPermission, useCreateWeatherPreference, useUpdateWeatherPreference } from "@/hooks/use-weather";
+import { NotificationSettings } from "@/components/notification-settings";
 
 const passwordChangeSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
@@ -237,6 +238,8 @@ const SettingsPage: React.FC = () => {
             </div>
           </div>
         </Card>
+        
+        <NotificationSettings />
         
         <Card className="p-5">
           <h2 className="text-xl font-semibold mb-1">Security</h2>
