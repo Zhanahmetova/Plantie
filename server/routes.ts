@@ -327,6 +327,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Weather API
+  app.get('/api/weather', ensureAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const preferences = await storage.getWeatherPreferenceByUserId(userId);
+      
+      if (!preferences) {
+        return res.status(404).json({ message: 'Weather preferences not found' });
+      }
+
+      const apiKey = process.env.OPENWEATHER_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ message: 'Weather service not configured' });
+      }
+
+      // Call OpenWeather API
+      const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(preferences.location)}&appid=${apiKey}&units=${preferences.unit}`;
+      
+      const weatherResponse = await fetch(weatherUrl);
+      if (!weatherResponse.ok) {
+        return res.status(400).json({ message: 'Failed to fetch weather data' });
+      }
+      
+      const weatherData = await weatherResponse.json();
+      
+      // Transform the data to match our interface
+      const transformedData = {
+        location: weatherData.name,
+        temperature: Math.round(weatherData.main.temp),
+        condition: weatherData.weather[0].main,
+        high: Math.round(weatherData.main.temp_max),
+        low: Math.round(weatherData.main.temp_min),
+        humidity: weatherData.main.humidity,
+        unit: preferences.unit
+      };
+      
+      res.json(transformedData);
+    } catch (error) {
+      console.error('Weather API error:', error);
+      res.status(500).json({ message: 'Failed to fetch weather data' });
+    }
+  });
+
+  // Weather by coordinates
+  app.post('/api/weather/coordinates', ensureAuthenticated, async (req, res) => {
+    try {
+      const { lat, lon, unit = 'metric' } = req.body;
+      
+      const apiKey = process.env.OPENWEATHER_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ message: 'Weather service not configured' });
+      }
+
+      // Call OpenWeather API with coordinates
+      const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=${unit}`;
+      
+      const weatherResponse = await fetch(weatherUrl);
+      if (!weatherResponse.ok) {
+        return res.status(400).json({ message: 'Failed to fetch weather data' });
+      }
+      
+      const weatherData = await weatherResponse.json();
+      
+      // Get location name and save preferences
+      const locationName = `${weatherData.name}, ${weatherData.sys.country}`;
+      const userId = req.user!.id;
+      
+      // Update or create weather preferences
+      const existingPreferences = await storage.getWeatherPreferenceByUserId(userId);
+      if (existingPreferences) {
+        await storage.updateWeatherPreference(userId, { location: locationName, unit });
+      } else {
+        await storage.createWeatherPreference({ userId, location: locationName, unit });
+      }
+      
+      // Transform the data to match our interface
+      const transformedData = {
+        location: locationName,
+        temperature: Math.round(weatherData.main.temp),
+        condition: weatherData.weather[0].main,
+        high: Math.round(weatherData.main.temp_max),
+        low: Math.round(weatherData.main.temp_min),
+        humidity: weatherData.main.humidity,
+        unit
+      };
+      
+      res.json(transformedData);
+    } catch (error) {
+      console.error('Weather coordinates API error:', error);
+      res.status(500).json({ message: 'Failed to fetch weather data' });
+    }
+  });
+
   // Plant identification API
   app.post('/api/plant-identification', ensureAuthenticated, async (req, res) => {
     try {

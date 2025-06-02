@@ -5,6 +5,7 @@ import { PlusCircleIcon, SunIcon } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { apiRequest } from "@/lib/queryClient";
 
 interface WeatherCardProps {
   className?: string;
@@ -22,8 +23,45 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
   const [showLocationSetup, setShowLocationSetup] = useState(false);
   const [manualLocation, setManualLocation] = useState("");
   const [unit, setUnit] = useState<"metric" | "imperial">("metric");
-  
-  if (isLoading) {
+
+  const handleLocationRequest = async () => {
+    if (coordinates) {
+      try {
+        await apiRequest("/api/weather/coordinates", {
+          method: "POST",
+          body: { lat: coordinates.lat, lon: coordinates.lon, unit }
+        });
+        setShowLocationSetup(false);
+      } catch (error) {
+        console.error("Failed to save location:", error);
+      }
+    } else {
+      requestLocation();
+    }
+  };
+
+  const handleManualLocation = async () => {
+    if (!manualLocation.trim()) return;
+    
+    try {
+      await createPreferences.mutateAsync({
+        userId: 0, // This will be set by the server
+        location: manualLocation.trim(),
+        unit
+      });
+      setShowLocationSetup(false);
+      setManualLocation("");
+    } catch (error) {
+      console.error("Failed to save manual location:", error);
+    }
+  };
+
+  // Show location setup if no preferences exist
+  if (!preferences && !preferencesLoading && !showLocationSetup) {
+    setShowLocationSetup(true);
+  }
+
+  if (preferencesLoading || weatherLoading) {
     return (
       <div className={cn(
         "bg-white p-5 rounded-2xl shadow-sm relative overflow-hidden h-36 animate-pulse",
@@ -32,6 +70,71 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
         <div className="h-4 w-24 bg-muted rounded mb-2"></div>
         <div className="h-8 w-16 bg-muted rounded mb-2"></div>
         <div className="h-3 w-20 bg-muted rounded"></div>
+      </div>
+    );
+  }
+
+  // Show location setup modal
+  if (showLocationSetup || !preferences) {
+    return (
+      <div className={cn(
+        "bg-white p-5 rounded-2xl shadow-sm relative overflow-hidden",
+        className
+      )}>
+        <div className="text-center">
+          <h3 className="font-semibold text-lg mb-3">Weather Setup</h3>
+          <p className="text-muted-foreground text-sm mb-4">
+            Choose how to get your weather information
+          </p>
+          
+          {locationStatus === 'not-requested' && (
+            <Button onClick={handleLocationRequest} className="w-full mb-3">
+              Use My Location
+            </Button>
+          )}
+          
+          {locationStatus === 'requesting' && (
+            <div className="mb-3">
+              <p className="text-sm text-muted-foreground">Requesting location...</p>
+            </div>
+          )}
+          
+          {locationStatus === 'granted' && coordinates && (
+            <Button onClick={handleLocationRequest} className="w-full mb-3">
+              Save Location
+            </Button>
+          )}
+          
+          {(locationStatus === 'denied' || locationStatus === 'not-requested') && (
+            <div className="space-y-3">
+              <div className="text-sm text-muted-foreground">Or enter manually:</div>
+              <Input
+                placeholder="City, Country (e.g., London, UK)"
+                value={manualLocation}
+                onChange={(e) => setManualLocation(e.target.value)}
+                className="w-full"
+              />
+              <div className="flex gap-2">
+                <Select value={unit} onValueChange={(value) => setUnit(value as "metric" | "imperial")}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="metric">Celsius</SelectItem>
+                    <SelectItem value="imperial">Fahrenheit</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button 
+                  onClick={handleManualLocation} 
+                  disabled={!manualLocation.trim() || createPreferences.isPending}
+                  className="flex-1"
+                >
+                  Save
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -58,9 +161,15 @@ const WeatherCard: React.FC<WeatherCardProps> = ({
             <span className="mr-2">↑{weather?.high || 24}°</span>
             <span>↓{weather?.low || 10}°</span>
           </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {weather?.location}
+          </p>
         </div>
-        <button className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-full px-4 py-1.5 text-sm flex items-center transition-colors">
-          <PlusCircleIcon size={16} className="mr-1.5" /> Add
+        <button 
+          onClick={() => setShowLocationSetup(true)}
+          className="bg-accent hover:bg-accent/90 text-accent-foreground rounded-full px-4 py-1.5 text-sm flex items-center transition-colors"
+        >
+          <PlusCircleIcon size={16} className="mr-1.5" /> Setup
         </button>
       </div>
       

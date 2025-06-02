@@ -27,8 +27,10 @@ export function useWeatherPreferences() {
 export function useCreateWeatherPreference() {
   return useMutation({
     mutationFn: async (data: InsertWeatherPreference) => {
-      const res = await apiRequest("POST", "/api/weather-preferences", data);
-      return res.json();
+      return await apiRequest("/api/weather-preferences", {
+        method: "POST",
+        body: data
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/weather-preferences"] });
@@ -39,8 +41,10 @@ export function useCreateWeatherPreference() {
 export function useUpdateWeatherPreference() {
   return useMutation({
     mutationFn: async (data: Partial<WeatherPreference>) => {
-      const res = await apiRequest("PUT", "/api/weather-preferences", data);
-      return res.json();
+      return await apiRequest("/api/weather-preferences", {
+        method: "PUT",
+        body: data
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/weather-preferences"] });
