@@ -52,10 +52,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({
             <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-md mt-[-10px] mb-[-10px]">
               <PlusIcon className="text-white text-xl" />
             </div>
-            <span className={cn(
-              "text-xs mt-1",
-              isActive("/add-plant") ? "text-foreground" : "text-muted-foreground"
-            )}>
+            <span className="text-xs text-muted-foreground mt-[10px] mb-[10px]">
               Add Plant
             </span>
           </div>
