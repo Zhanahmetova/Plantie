@@ -28,6 +28,10 @@ export async function identifyPlant(imageBase64: string): Promise<PlantIdentific
     // Ensure the image has the proper data URL format
     const imageData = imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`;
     
+    // Debug logging
+    console.log('Image data length:', imageData.length);
+    console.log('Image data preview:', imageData.substring(0, 100) + '...');
+    
     const response = await fetch(`${PLANT_ID_BASE_URL}/identification`, {
       method: 'POST',
       headers: {
@@ -70,6 +74,10 @@ export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantI
   try {
     // Ensure the image has the proper data URL format
     const imageData = imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`;
+    
+    // Debug logging
+    console.log('Health analysis - Image data length:', imageData.length);
+    console.log('Health analysis - Image data preview:', imageData.substring(0, 100) + '...');
     
     const response = await fetch(`${PLANT_ID_BASE_URL}/health_assessment`, {
       method: 'POST',
