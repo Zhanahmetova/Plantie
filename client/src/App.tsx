@@ -22,6 +22,7 @@ const SettingsPage = lazy(() => import("@/pages/settings"));
 const TasksPage = lazy(() => import("@/pages/tasks-page"));
 const AddTaskPage = lazy(() => import("@/pages/add-task"));
 const EditTaskPage = lazy(() => import("@/pages/edit-task"));
+const NotificationsPage = lazy(() => import("@/pages/notifications"));
 
 function Router() {
   return (
@@ -35,6 +36,7 @@ function Router() {
       <ProtectedRoute path="/tasks" component={TasksPage} />
       <ProtectedRoute path="/tasks/new" component={AddTaskPage} />
       <ProtectedRoute path="/tasks/:id/edit" component={EditTaskPage} />
+      <ProtectedRoute path="/notifications" component={NotificationsPage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
       {/* Legacy routes for compatibility */}
       <ProtectedRoute path="/identify" component={PlantIdentificationPage} />
