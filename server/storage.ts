@@ -20,6 +20,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   createGoogleUser(user: InsertGoogleUser): Promise<User>;
   updateUser(id: number, userData: Partial<User>): Promise<User | undefined>;
+  updateFcmToken(userId: number, token: string): Promise<boolean>;
 
   // Plant operations
   getPlant(id: number): Promise<Plant | undefined>;
@@ -259,7 +260,8 @@ export class MemStorage implements IStorage {
       email: null,
       googleId: null,
       displayName: null,
-      profilePicture: null
+      profilePicture: null,
+      fcmToken: null
     };
     this.users.set(id, user);
     return user;
@@ -270,7 +272,8 @@ export class MemStorage implements IStorage {
     const user: User = { 
       ...insertUser, 
       id,
-      password: null
+      password: null,
+      fcmToken: null
     };
     this.users.set(id, user);
     return user;
@@ -283,6 +286,15 @@ export class MemStorage implements IStorage {
     const updatedUser = { ...user, ...userData };
     this.users.set(id, updatedUser);
     return updatedUser;
+  }
+
+  async updateFcmToken(userId: number, token: string): Promise<boolean> {
+    const user = this.users.get(userId);
+    if (!user) return false;
+    
+    user.fcmToken = token;
+    this.users.set(userId, user);
+    return true;
   }
 
   // Plant operations

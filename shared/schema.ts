@@ -56,6 +56,7 @@ export const users = pgTable("users", {
   googleId: text("google_id"),
   displayName: text("display_name"),
   profilePicture: text("profile_picture"),
+  fcmToken: text("fcm_token"),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
