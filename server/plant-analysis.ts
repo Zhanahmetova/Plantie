@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
 const PLANT_ID_API_KEY = "XdKD593MYnx3NKXKWgeFTUzeCDG4D9liAymkGuiYPo7wb2vwru";
-const PLANT_ID_BASE_URL = "https://api.plant.id/v3";
+const PLANT_ID_API_URL = "https://plant.id/api_frontend/identify";
 
 interface PlantIdentificationResult {
   name: string;
@@ -32,18 +32,19 @@ export async function identifyPlant(imageBase64: string): Promise<PlantIdentific
     console.log('Image data length:', imageData.length);
     console.log('Image data preview:', imageData.substring(0, 100) + '...');
     
-    const response = await fetch(`${PLANT_ID_BASE_URL}/identification`, {
+    const response = await fetch(PLANT_ID_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Api-Key': PLANT_ID_API_KEY,
       },
       body: JSON.stringify({
+        classification_level: "all",
+        health: "all",
         images: [imageData],
-        latitude: 49.207,
-        longitude: 16.608,
+        latitude: 43.20055968913299,
+        longitude: 76.893142413728,
         similar_images: true,
-        plant_details: ["common_names", "url", "name_authority", "wiki_description", "taxonomy"]
+        symptoms: true
       })
     });
 
@@ -79,17 +80,19 @@ export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantI
     console.log('Health analysis - Image data length:', imageData.length);
     console.log('Health analysis - Image data preview:', imageData.substring(0, 100) + '...');
     
-    const response = await fetch(`${PLANT_ID_BASE_URL}/health_assessment`, {
+    const response = await fetch(PLANT_ID_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Api-Key': PLANT_ID_API_KEY,
       },
       body: JSON.stringify({
+        classification_level: "all",
+        health: "all",
         images: [imageData],
-        latitude: 49.207,
-        longitude: 16.608,
-        similar_images: true
+        latitude: 43.20055968913299,
+        longitude: 76.893142413728,
+        similar_images: true,
+        symptoms: true
       })
     });
 
