@@ -111,6 +111,7 @@ export class MemStorage implements IStorage {
     this.plantIdentifications = new Map();
     this.plantRecords = new Map();
     this.notifications = new Map();
+    this.plantHealthScans = new Map();
     
     this.currentUserId = 1;
     this.currentPlantId = 1;
@@ -119,6 +120,7 @@ export class MemStorage implements IStorage {
     this.currentPlantIdentificationId = 1;
     this.currentPlantRecordId = 1;
     this.currentNotificationId = 1;
+    this.currentPlantHealthScanId = 1;
 
     // Initialize session store (memory store)
     this.sessionStore = new MemoryStore({
@@ -540,6 +542,47 @@ export class MemStorage implements IStorage {
     return Array.from(this.notifications.values())
       .filter(notification => notification.userId === userId && !notification.isRead)
       .length;
+  }
+
+  // Plant health scan operations
+  async getPlantHealthScan(id: number): Promise<PlantHealthScan | undefined> {
+    return this.plantHealthScans.get(id);
+  }
+
+  async getPlantHealthScansByUserId(userId: number): Promise<PlantHealthScan[]> {
+    return Array.from(this.plantHealthScans.values())
+      .filter(scan => scan.userId === userId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getPlantHealthScansByPlantId(plantId: number): Promise<PlantHealthScan[]> {
+    return Array.from(this.plantHealthScans.values())
+      .filter(scan => scan.plantId === plantId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async createPlantHealthScan(scan: InsertPlantHealthScan): Promise<PlantHealthScan> {
+    const id = this.currentPlantHealthScanId++;
+    const newScan: PlantHealthScan = {
+      ...scan,
+      id,
+      createdAt: new Date(),
+    };
+    this.plantHealthScans.set(id, newScan);
+    return newScan;
+  }
+
+  async updatePlantHealthScan(id: number, scanUpdate: Partial<PlantHealthScan>): Promise<PlantHealthScan | undefined> {
+    const existingScan = this.plantHealthScans.get(id);
+    if (!existingScan) return undefined;
+
+    const updatedScan = { ...existingScan, ...scanUpdate };
+    this.plantHealthScans.set(id, updatedScan);
+    return updatedScan;
+  }
+
+  async deletePlantHealthScan(id: number): Promise<boolean> {
+    return this.plantHealthScans.delete(id);
   }
 }
 

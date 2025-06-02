@@ -1,4 +1,4 @@
-import { eq, and, gte, lt } from 'drizzle-orm';
+import { eq, and, gte, lt, desc } from 'drizzle-orm';
 import { db } from './db';
 import { pool } from './db';
 import session from 'express-session';
@@ -359,5 +359,55 @@ export class DatabaseStorage implements IStorage {
       .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
       
     return result.length;
+  }
+
+  // Plant health scan operations
+  async getPlantHealthScan(id: number): Promise<PlantHealthScan | undefined> {
+    const [scan] = await db.select().from(plantHealthScans).where(eq(plantHealthScans.id, id));
+    return scan || undefined;
+  }
+
+  async getPlantHealthScansByUserId(userId: number): Promise<PlantHealthScan[]> {
+    return await db
+      .select()
+      .from(plantHealthScans)
+      .where(eq(plantHealthScans.userId, userId))
+      .orderBy(desc(plantHealthScans.createdAt));
+  }
+
+  async getPlantHealthScansByPlantId(plantId: number): Promise<PlantHealthScan[]> {
+    return await db
+      .select()
+      .from(plantHealthScans)
+      .where(eq(plantHealthScans.plantId, plantId))
+      .orderBy(desc(plantHealthScans.createdAt));
+  }
+
+  async createPlantHealthScan(scan: InsertPlantHealthScan): Promise<PlantHealthScan> {
+    const [newScan] = await db
+      .insert(plantHealthScans)
+      .values(scan)
+      .returning();
+    
+    return newScan;
+  }
+
+  async updatePlantHealthScan(id: number, scanUpdate: Partial<PlantHealthScan>): Promise<PlantHealthScan | undefined> {
+    const [updatedScan] = await db
+      .update(plantHealthScans)
+      .set(scanUpdate)
+      .where(eq(plantHealthScans.id, id))
+      .returning();
+    
+    return updatedScan;
+  }
+
+  async deletePlantHealthScan(id: number): Promise<boolean> {
+    const [deletedScan] = await db
+      .delete(plantHealthScans)
+      .where(eq(plantHealthScans.id, id))
+      .returning();
+      
+    return !!deletedScan;
   }
 }
