@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Camera, X, Scan, Loader2, AlertTriangle, CheckCircle, Info } from "lucide-react";
+import { Camera, X, Scan, Loader2, AlertTriangle, CheckCircle, Info, Upload, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +39,7 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize camera
   useEffect(() => {
@@ -70,6 +71,47 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
     if (cameraStream) {
       cameraStream.getTracks().forEach(track => track.stop());
       setCameraStream(null);
+    }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check if file is an image
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const imageData = e.target?.result as string;
+      if (imageData) {
+        performScan(imageData);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const performScan = async (imageData: string) => {
+    setIsScanning(true);
+    setScanProgress(0);
+    setError(null);
+    
+    try {
+      const result = await analyzePlantHealth(imageData);
+      setScanResult(result);
+      onScanComplete(result);
+    } catch (err) {
+      setError("Failed to analyze plant. Please try again.");
+    } finally {
+      setIsScanning(false);
+      setScanProgress(0);
     }
   };
 
@@ -131,16 +173,21 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
   const handleScan = async () => {
     if (!videoRef.current) return;
     
+    const imageData = captureFrame();
+    if (!imageData) {
+      setError("Failed to capture image");
+      return;
+    }
+    
+    performScan(imageData);
+  };
+
+  const performScan = async (imageData: string) => {
     setIsScanning(true);
     setScanProgress(0);
     setError(null);
     
     try {
-      const imageData = captureFrame();
-      if (!imageData) {
-        throw new Error("Failed to capture image");
-      }
-      
       const result = await analyzePlantHealth(imageData);
       setScanResult(result);
       onScanComplete(result);
