@@ -746,6 +746,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // FCM Token management for push notifications
+  app.post("/api/notifications/fcm-token", ensureAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as any)?.id;
+      const { token } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      if (!token) {
+        return res.status(400).json({ message: "FCM token is required" });
+      }
+
+      const success = await storage.updateFcmToken(userId, token);
+      if (success) {
+        res.json({ message: "Push notifications enabled successfully" });
+      } else {
+        res.status(500).json({ message: "Failed to enable push notifications" });
+      }
+    } catch (error) {
+      console.error("Error updating FCM token:", error);
+      res.status(500).json({ message: "Failed to enable push notifications" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

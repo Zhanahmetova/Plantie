@@ -82,6 +82,19 @@ export class DatabaseStorage implements IStorage {
     return updatedUser;
   }
 
+  async updateFcmToken(userId: number, token: string): Promise<boolean> {
+    try {
+      await db
+        .update(users)
+        .set({ fcmToken: token })
+        .where(eq(users.id, userId));
+      return true;
+    } catch (error) {
+      console.error("Error updating FCM token:", error);
+      return false;
+    }
+  }
+
   // Plant operations
   async getPlant(id: number): Promise<Plant | undefined> {
     const [plant] = await db.select().from(plants).where(eq(plants.id, id));
