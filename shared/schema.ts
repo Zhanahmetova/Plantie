@@ -114,6 +114,8 @@ export const plantRecords = pgTable("plant_records", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+
+
 // Custom date validation schema
 const dateSchema = z.preprocess((val) => {
   if (typeof val === 'string' || val instanceof String) {
@@ -129,6 +131,8 @@ export const insertPlantRecordSchema = createInsertSchema(plantRecords, {
   id: true,
   createdAt: true,
 });
+
+
 
 // Type definitions
 export type User = typeof users.$inferSelect;
@@ -149,6 +153,12 @@ export type InsertPlantIdentification = z.infer<typeof insertPlantIdentification
 
 export type PlantRecord = typeof plantRecords.$inferSelect;
 export type InsertPlantRecord = z.infer<typeof insertPlantRecordSchema>;
+
+export type PlantHealthScan = typeof plantHealthScans.$inferSelect;
+export type InsertPlantHealthScan = z.infer<typeof insertPlantHealthScanSchema>;
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 
 // Relations
 

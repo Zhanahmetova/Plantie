@@ -105,7 +105,7 @@ export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantI
       if (healthData.diseases && healthData.diseases.length > 0) {
         for (const disease of healthData.diseases.slice(0, 3)) { // Limit to top 3
           if (disease.probability > 0.3) { // Only include confident predictions
-            const severity = disease.probability > 0.7 ? "high" : disease.probability > 0.5 ? "medium" : "low";
+            const severity: "low" | "medium" | "high" = disease.probability > 0.7 ? "high" : disease.probability > 0.5 ? "medium" : "low";
             
             issues.push({
               type: "disease" as const,
