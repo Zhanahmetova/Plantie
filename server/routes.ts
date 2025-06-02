@@ -810,14 +810,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const scanData = {
         userId,
         plantId: plantId || null,
-        image,
+        imageUrl: image,
         overallHealth: healthResult.overallHealth,
         healthScore: healthResult.healthScore,
         issues: healthResult.issues,
         recommendations: healthResult.recommendations,
         identifiedName: identificationResult?.name || null,
         identifiedSpecies: identificationResult?.species || null,
-        identificationConfidence: identificationResult?.confidence || null,
+        identificationConfidence: Math.round((identificationResult?.confidence || 0) * 100),
       };
 
       const scan = await storage.createPlantHealthScan(scanData);
