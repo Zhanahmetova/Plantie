@@ -262,7 +262,7 @@ export const plantHealthScans = pgTable("plant_health_scans", {
   healthScore: integer("health_score").notNull(), // 0-100
   identifiedPlantName: varchar("identified_plant_name"),
   identifiedPlantSpecies: varchar("identified_plant_species"),
-  identificationConfidence: doublePrecision("identification_confidence"), // 0-1
+  identificationConfidence: integer("identification_confidence"), // 0-100
   issues: json("issues").notNull().$type<{
     type: "disease" | "pest" | "nutrient" | "watering" | "light";
     severity: "low" | "medium" | "high";
