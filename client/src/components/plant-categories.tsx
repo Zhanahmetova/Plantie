@@ -52,7 +52,7 @@ const PlantCategories: React.FC<PlantCategoriesProps> = ({ className }) => {
           View All
         </Link>
       </div>
-      <div className="flex space-x-3 mb-4 overflow-x-auto pb-2 pl-[16px] pr-[16px]">
+      <div className="flex space-x-3 mb-4 overflow-x-auto pb-2 pl-[0px] pr-[0px]">
         <button
           className={cn(
             "whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium flex items-center",
