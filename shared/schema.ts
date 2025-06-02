@@ -213,3 +213,40 @@ export const plantRecordsRelations = relations(plantRecords, ({ one }) => ({
     relationName: "plantRecords"
   }),
 }));
+
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  taskId: integer("task_id"),
+  plantId: integer("plant_id"),
+  type: text("type").notNull(), // 'task_due' | 'task_overdue' | 'plant_care'
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  scheduledFor: timestamp("scheduled_for"),
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+  task: one(tasks, {
+    fields: [notifications.taskId],
+    references: [tasks.id],
+  }),
+  plant: one(plants, {
+    fields: [notifications.plantId],
+    references: [plants.id],
+  }),
+}));

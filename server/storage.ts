@@ -4,7 +4,8 @@ import {
   tasks, type Task, type InsertTask,
   weatherPreferences, type WeatherPreference, type InsertWeatherPreference,
   plantIdentifications, type PlantIdentification, type InsertPlantIdentification,
-  plantRecords, type PlantRecord, type InsertPlantRecord
+  plantRecords, type PlantRecord, type InsertPlantRecord,
+  notifications, type Notification, type InsertNotification
 } from "@shared/schema";
 
 import session from "express-session";
@@ -54,6 +55,14 @@ export interface IStorage {
   updatePlantRecord(id: number, record: Partial<PlantRecord>): Promise<PlantRecord | undefined>;
   deletePlantRecord(id: number): Promise<boolean>;
 
+  // Notification operations
+  getNotificationsByUserId(userId: number): Promise<Notification[]>;
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  markNotificationAsRead(id: number): Promise<boolean>;
+  markAllNotificationsAsRead(userId: number): Promise<boolean>;
+  deleteNotification(id: number): Promise<boolean>;
+  getUnreadNotificationsCount(userId: number): Promise<number>;
+
   // Session management
   sessionStore: Store;
 }
@@ -71,6 +80,7 @@ export class MemStorage implements IStorage {
   private weatherPreferences: Map<number, WeatherPreference>;
   private plantIdentifications: Map<number, PlantIdentification>;
   private plantRecords: Map<number, PlantRecord>;
+  private notifications: Map<number, Notification>;
   public sessionStore: Store;
   
   private currentUserId: number;
@@ -79,6 +89,7 @@ export class MemStorage implements IStorage {
   private currentWeatherPreferenceId: number;
   private currentPlantIdentificationId: number;
   private currentPlantRecordId: number;
+  private currentNotificationId: number;
 
   constructor() {
     this.users = new Map();
@@ -87,6 +98,7 @@ export class MemStorage implements IStorage {
     this.weatherPreferences = new Map();
     this.plantIdentifications = new Map();
     this.plantRecords = new Map();
+    this.notifications = new Map();
     
     this.currentUserId = 1;
     this.currentPlantId = 1;
@@ -94,6 +106,7 @@ export class MemStorage implements IStorage {
     this.currentWeatherPreferenceId = 1;
     this.currentPlantIdentificationId = 1;
     this.currentPlantRecordId = 1;
+    this.currentNotificationId = 1;
 
     // Initialize session store (memory store)
     this.sessionStore = new MemoryStore({
