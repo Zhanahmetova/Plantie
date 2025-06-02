@@ -1,109 +1,102 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json, varchar, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, text, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Plant table
+// Users table
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: varchar("username", { length: 255 }).unique().notNull(),
+  password: varchar("password", { length: 255 }),
+  email: varchar("email", { length: 255 }),
+  googleId: varchar("google_id", { length: 255 }),
+  displayName: varchar("display_name", { length: 255 }),
+  profilePicture: varchar("profile_picture", { length: 500 }),
+  fcmToken: varchar("fcm_token", { length: 255 }),
+});
+
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+});
+
+export const insertGoogleUserSchema = createInsertSchema(users).pick({
+  email: true,
+  googleId: true,
+  displayName: true,
+  profilePicture: true,
+}).extend({
+  username: z.string().min(1),
+});
+
+// Plants table
 export const plants = pgTable("plants", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  species: text("species").notNull(),
-  family: text("family").notNull(),
-  category: text("category").notNull(), // indoor, outdoor
-  image: text("image").notNull(),
-  wateringFrequency: integer("watering_frequency").notNull(), // days between watering
-  lastWatered: timestamp("last_watered"), 
+  userId: integer("user_id").notNull().references(() => users.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  species: varchar("species", { length: 255 }).notNull(),
+  family: varchar("family", { length: 255 }).notNull(),
+  category: varchar("category", { length: 100 }).notNull(),
+  image: varchar("image", { length: 500 }).notNull(),
+  wateringFrequency: integer("watering_frequency").notNull(),
+  lastWatered: timestamp("last_watered"),
   lastFertilized: timestamp("last_fertilized"),
-  light: text("light").notNull(), // low, medium, high
-  temperature: json("temperature").$type<{min: number, max: number}>().notNull(),
-  humidity: text("humidity").notNull(), // low, medium, high
+  light: varchar("light", { length: 50 }).notNull(),
+  temperature: json("temperature").$type<{ min: number; max: number }>().notNull(),
+  humidity: varchar("humidity", { length: 50 }).notNull(),
   notes: text("notes"),
-  userId: integer("user_id").notNull(),
 });
 
 export const insertPlantSchema = createInsertSchema(plants).omit({
   id: true,
 });
 
-// Task table
+// Tasks table
 export const tasks = pgTable("tasks", {
   id: serial("id").primaryKey(),
-  plantId: integer("plant_id").notNull(),
-  type: text("type").notNull(), // 'watering' | 'misting' | 'fertilizing'
-  startDate: text("start_date").notNull(), // ISO format
+  userId: integer("user_id").notNull().references(() => users.id),
+  plantId: integer("plant_id").notNull().references(() => plants.id),
+  type: varchar("type", { length: 50 }).notNull(),
+  startDate: varchar("start_date", { length: 10 }).notNull(),
+  repeat: json("repeat").notNull(),
   completed: boolean("completed").default(false),
-  repeat: json("repeat").notNull(), // { type: 'everyNDays' | 'oneTime' | 'daily' | 'weekly', interval?: number, daysOfWeek?: string[] }
-  userId: integer("user_id").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertTaskSchema = createInsertSchema(tasks).pick({
-  plantId: true,
-  type: true,
-  startDate: true,
-  completed: true,
-  repeat: true,
-  userId: true,
+export const insertTaskSchema = createInsertSchema(tasks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
-// User table
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password"),
-  email: text("email"),
-  googleId: text("google_id"),
-  displayName: text("display_name"),
-  profilePicture: text("profile_picture"),
-  fcmToken: text("fcm_token"),
-});
-
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
-
-export const insertGoogleUserSchema = createInsertSchema(users).pick({
-  username: true,
-  email: true,
-  googleId: true,
-  displayName: true,
-  profilePicture: true,
-});
-
-// Weather Preference table
+// Weather preferences table
 export const weatherPreferences = pgTable("weather_preferences", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().unique(),
-  location: text("location").notNull(),
-  unit: text("unit").notNull().default("metric"), // metric or imperial
+  userId: integer("user_id").notNull().references(() => users.id),
+  location: varchar("location", { length: 255 }).notNull(),
+  unit: varchar("unit", { length: 10 }).notNull().default("celsius"),
 });
 
 export const insertWeatherPreferenceSchema = createInsertSchema(weatherPreferences).omit({
   id: true,
 });
 
-// PlantIdentification table
+// Plant identifications table
 export const plantIdentifications = pgTable("plant_identifications", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
   image: text("image").notNull(),
-  identifiedName: text("identified_name"),
-  identifiedSpecies: text("identified_species"),
-  confidenceScore: integer("confidence_score"),
-  userId: integer("user_id").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  identifiedName: varchar("identified_name", { length: 255 }),
+  confidence: integer("confidence"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertPlantIdentificationSchema = createInsertSchema(plantIdentifications).omit({
   id: true,
-  identifiedName: true,
-  identifiedSpecies: true,
-  confidenceScore: true,
   createdAt: true,
 });
 
-// PlantRecord table
+// Plant records table
 export const plantRecords = pgTable("plant_records", {
   id: serial("id").primaryKey(),
   image: text("image").notNull(),
@@ -114,7 +107,54 @@ export const plantRecords = pgTable("plant_records", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Notifications table
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  title: varchar("title", { length: 256 }).notNull(),
+  message: text("message").notNull(),
+  type: varchar("type", { length: 50 }).notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+  plantId: integer("plant_id").references(() => plants.id),
+  taskId: integer("task_id").references(() => tasks.id),
+  scheduledFor: timestamp("scheduled_for"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
 
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Plant health scans table
+export const plantHealthScans = pgTable("plant_health_scans", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  plantId: integer("plant_id").references(() => plants.id),
+  imageUrl: varchar("image_url").notNull(),
+  overallHealth: varchar("overall_health").notNull(),
+  healthScore: integer("health_score").notNull(),
+  identifiedPlantName: varchar("identified_plant_name"),
+  identifiedPlantSpecies: varchar("identified_plant_species"),
+  identificationConfidence: integer("identification_confidence"),
+  issues: json("issues").notNull().$type<{
+    type: "disease" | "pest" | "nutrient" | "watering" | "light";
+    severity: "low" | "medium" | "high";
+    name: string;
+    description: string;
+    treatment: string;
+    confidence: number;
+  }[]>(),
+  recommendations: json("recommendations").notNull().$type<string[]>(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPlantHealthScanSchema = createInsertSchema(plantHealthScans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
 // Custom date validation schema
 const dateSchema = z.preprocess((val) => {
@@ -131,8 +171,6 @@ export const insertPlantRecordSchema = createInsertSchema(plantRecords, {
   id: true,
   createdAt: true,
 });
-
-
 
 // Type definitions
 export type User = typeof users.$inferSelect;
@@ -154,11 +192,11 @@ export type InsertPlantIdentification = z.infer<typeof insertPlantIdentification
 export type PlantRecord = typeof plantRecords.$inferSelect;
 export type InsertPlantRecord = z.infer<typeof insertPlantRecordSchema>;
 
-export type PlantHealthScan = typeof plantHealthScans.$inferSelect;
-export type InsertPlantHealthScan = z.infer<typeof insertPlantHealthScanSchema>;
-
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+
+export type PlantHealthScan = typeof plantHealthScans.$inferSelect;
+export type InsertPlantHealthScan = z.infer<typeof insertPlantHealthScanSchema>;
 
 // Relations
 
@@ -172,6 +210,8 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   }),
   plantIdentifications: many(plantIdentifications),
   plantRecords: many(plantRecords),
+  notifications: many(notifications),
+  plantHealthScans: many(plantHealthScans),
 }));
 
 // Plant relations
@@ -182,6 +222,7 @@ export const plantsRelations = relations(plants, ({ many, one }) => ({
   }),
   tasks: many(tasks),
   records: many(plantRecords, { relationName: "plantRecords" }),
+  healthScans: many(plantHealthScans),
 }));
 
 // Task relations
@@ -196,7 +237,7 @@ export const tasksRelations = relations(tasks, ({ one }) => ({
   }),
 }));
 
-// Weather preferences relations
+// Weather preference relations
 export const weatherPreferencesRelations = relations(weatherPreferences, ({ one }) => ({
   user: one(users, {
     fields: [weatherPreferences.userId],
@@ -221,32 +262,11 @@ export const plantRecordsRelations = relations(plantRecords, ({ one }) => ({
   plant: one(plants, {
     fields: [plantRecords.plantId],
     references: [plants.id],
-    relationName: "plantRecords"
+    relationName: "plantRecords",
   }),
 }));
 
-// Notifications table
-export const notifications = pgTable("notifications", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  taskId: integer("task_id"),
-  plantId: integer("plant_id"),
-  type: text("type").notNull(), // 'task_due' | 'task_overdue' | 'plant_care'
-  title: text("title").notNull(),
-  message: text("message").notNull(),
-  isRead: boolean("is_read").notNull().default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  scheduledFor: timestamp("scheduled_for"),
-});
-
-export const insertNotificationSchema = createInsertSchema(notifications).omit({
-  id: true,
-  createdAt: true,
-});
-
-export type Notification = typeof notifications.$inferSelect;
-export type InsertNotification = z.infer<typeof insertNotificationSchema>;
-
+// Notification relations
 export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, {
     fields: [notifications.userId],
@@ -262,46 +282,7 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
 }));
 
-// Plant Health Scans table
-export const plantHealthScans = pgTable("plant_health_scans", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  plantId: integer("plant_id").references(() => plants.id, { onDelete: "set null" }),
-  imageUrl: varchar("image_url").notNull(),
-  overallHealth: varchar("overall_health").notNull(), // excellent, good, fair, poor, critical
-  healthScore: integer("health_score").notNull(), // 0-100
-  identifiedPlantName: varchar("identified_plant_name"),
-  identifiedPlantSpecies: varchar("identified_plant_species"),
-  identificationConfidence: integer("identification_confidence"), // 0-100
-  issues: json("issues").notNull().$type<{
-    type: "disease" | "pest" | "nutrient" | "watering" | "light";
-    severity: "low" | "medium" | "high";
-    name: string;
-    description: string;
-    treatment: string;
-    confidence: number;
-  }[]>(),
-  recommendations: json("recommendations").notNull().$type<string[]>(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-export const insertPlantHealthScanSchema = createInsertSchema(plantHealthScans).pick({
-  userId: true,
-  plantId: true,
-  imageUrl: true,
-  overallHealth: true,
-  healthScore: true,
-  identifiedPlantName: true,
-  identifiedPlantSpecies: true,
-  identificationConfidence: true,
-  issues: true,
-  recommendations: true,
-});
-
-export type PlantHealthScan = typeof plantHealthScans.$inferSelect;
-export type InsertPlantHealthScan = z.infer<typeof insertPlantHealthScanSchema>;
-
+// Plant health scan relations
 export const plantHealthScansRelations = relations(plantHealthScans, ({ one }) => ({
   user: one(users, {
     fields: [plantHealthScans.userId],

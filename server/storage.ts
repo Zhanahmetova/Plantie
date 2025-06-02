@@ -5,7 +5,8 @@ import {
   weatherPreferences, type WeatherPreference, type InsertWeatherPreference,
   plantIdentifications, type PlantIdentification, type InsertPlantIdentification,
   plantRecords, type PlantRecord, type InsertPlantRecord,
-  notifications, type Notification, type InsertNotification
+  notifications, type Notification, type InsertNotification,
+  plantHealthScans, type PlantHealthScan, type InsertPlantHealthScan
 } from "@shared/schema";
 
 import session from "express-session";
@@ -90,6 +91,7 @@ export class MemStorage implements IStorage {
   private plantIdentifications: Map<number, PlantIdentification>;
   private plantRecords: Map<number, PlantRecord>;
   private notifications: Map<number, Notification>;
+  private plantHealthScans: Map<number, PlantHealthScan>;
   public sessionStore: Store;
   
   private currentUserId: number;
@@ -99,6 +101,7 @@ export class MemStorage implements IStorage {
   private currentPlantIdentificationId: number;
   private currentPlantRecordId: number;
   private currentNotificationId: number;
+  private currentPlantHealthScanId: number;
 
   constructor() {
     this.users = new Map();
