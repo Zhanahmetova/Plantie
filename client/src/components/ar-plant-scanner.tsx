@@ -182,23 +182,6 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
     performScan(imageData);
   };
 
-  const performScan = async (imageData: string) => {
-    setIsScanning(true);
-    setScanProgress(0);
-    setError(null);
-    
-    try {
-      const result = await analyzePlantHealth(imageData);
-      setScanResult(result);
-      onScanComplete(result);
-    } catch (err) {
-      setError("Failed to analyze plant. Please try again.");
-    } finally {
-      setIsScanning(false);
-      setScanProgress(0);
-    }
-  };
-
   const getHealthColor = (health: string) => {
     switch (health) {
       case "excellent": return "text-green-600";
