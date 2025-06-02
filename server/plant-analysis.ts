@@ -76,31 +76,33 @@ export async function identifyPlant(imageBase64: string): Promise<PlantIdentific
 
 export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantIdentificationResult | null): Promise<PlantHealthResult> {
   try {
-    // Ensure the image has the proper data URL format
     const imageData = imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`;
     
-    // Debug logging
     console.log('Health analysis - Image data length:', imageData.length);
     console.log('Health analysis - Image data preview:', imageData.substring(0, 100) + '...');
     
+    const payload = {
+      images: [imageData],
+      latitude: 49.207,
+      longitude: 16.608,
+      similar_images: true
+    };
+
     const response = await fetch(PLANT_ID_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Api-Key': PLANT_ID_API_KEY
       },
-      body: JSON.stringify({
-        classification_level: "all",
-        health: "all",
-        images: [imageData],
-        latitude: 43.20055968913299,
-        longitude: 76.893142413728,
-        similar_images: true,
-        symptoms: true
-      })
+      body: JSON.stringify(payload)
     });
 
+    console.log('Plant.ID Health API response status:', response.status);
+
     if (!response.ok) {
+      const errorText = await response.text();
       console.error('Plant.ID Health API error:', response.status, response.statusText);
+      console.error('Health API error response:', errorText);
       return generateFallbackHealthResult(plantInfo);
     }
 
