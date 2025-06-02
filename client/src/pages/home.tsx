@@ -28,7 +28,7 @@ const Home: React.FC = () => {
         </div>
         
         <header className="px-1 pt-7 pb-3">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center ml-[16px] mr-[16px]">
             <div>
               <h1 className="font-bold text-2xl text-foreground">Plant Care Assistant</h1>
               <p className="text-sm text-muted-foreground">
