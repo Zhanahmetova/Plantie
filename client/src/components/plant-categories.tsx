@@ -55,12 +55,7 @@ const PlantCategories: React.FC<PlantCategoriesProps> = ({
       </div>
       <div className="flex space-x-3 mb-4 overflow-x-auto pb-2">
         <button 
-          className={cn(
-            "whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium flex items-center",
-            activeCategory === "all" 
-              ? "bg-primary text-white" 
-              : "bg-white text-foreground"
-          )}
+          className="flex space-x-3 mb-4 overflow-x-auto pb-2 ml-[16px] mr-[16px]"
           onClick={() => setActiveCategory("all")}
         >
           <AllPlantsIcon size={16} className="mr-2" />
