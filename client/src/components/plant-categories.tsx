@@ -55,7 +55,7 @@ const PlantCategories: React.FC<PlantCategoriesProps> = ({
       </div>
       <div className="flex space-x-3 mb-4 overflow-x-auto pb-2">
         <button 
-          className="flex space-x-3 mb-4 overflow-x-auto pb-2 ml-[16px] mr-[16px]"
+          className="flex space-x-3 mb-4 overflow-x-auto pb-2 bg-[#3d445c] ml-[6px] mr-[6px]"
           onClick={() => setActiveCategory("all")}
         >
           <AllPlantsIcon size={16} className="mr-2" />
