@@ -46,7 +46,7 @@ const PlantCategories: React.FC<PlantCategoriesProps> = ({ className }) => {
 
   return (
     <div className={className}>
-      <div className="flex justify-between items-center mb-3 ml-[16px] mr-[16px]">
+      <div className="flex justify-between items-center mb-3 ml-[0px] mr-[0px]">
         <h2 className="font-semibold text-lg text-foreground">My Garden</h2>
         <Link href="/plants" className="text-primary text-sm">
           View All
