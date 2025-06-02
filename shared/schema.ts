@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, json, varchar, doublePrecision } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -248,6 +248,57 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   }),
   plant: one(plants, {
     fields: [notifications.plantId],
+    references: [plants.id],
+  }),
+}));
+
+// Plant Health Scans table
+export const plantHealthScans = pgTable("plant_health_scans", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  plantId: integer("plant_id").references(() => plants.id, { onDelete: "set null" }),
+  imageUrl: varchar("image_url").notNull(),
+  overallHealth: varchar("overall_health").notNull(), // excellent, good, fair, poor, critical
+  healthScore: integer("health_score").notNull(), // 0-100
+  identifiedPlantName: varchar("identified_plant_name"),
+  identifiedPlantSpecies: varchar("identified_plant_species"),
+  identificationConfidence: doublePrecision("identification_confidence"), // 0-1
+  issues: json("issues").notNull().$type<{
+    type: "disease" | "pest" | "nutrient" | "watering" | "light";
+    severity: "low" | "medium" | "high";
+    name: string;
+    description: string;
+    treatment: string;
+    confidence: number;
+  }[]>(),
+  recommendations: json("recommendations").notNull().$type<string[]>(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPlantHealthScanSchema = createInsertSchema(plantHealthScans).pick({
+  userId: true,
+  plantId: true,
+  imageUrl: true,
+  overallHealth: true,
+  healthScore: true,
+  identifiedPlantName: true,
+  identifiedPlantSpecies: true,
+  identificationConfidence: true,
+  issues: true,
+  recommendations: true,
+});
+
+export type PlantHealthScan = typeof plantHealthScans.$inferSelect;
+export type InsertPlantHealthScan = z.infer<typeof insertPlantHealthScanSchema>;
+
+export const plantHealthScansRelations = relations(plantHealthScans, ({ one }) => ({
+  user: one(users, {
+    fields: [plantHealthScans.userId],
+    references: [users.id],
+  }),
+  plant: one(plants, {
+    fields: [plantHealthScans.plantId],
     references: [plants.id],
   }),
 }));

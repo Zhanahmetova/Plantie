@@ -64,6 +64,14 @@ export interface IStorage {
   deleteNotification(id: number): Promise<boolean>;
   getUnreadNotificationsCount(userId: number): Promise<number>;
 
+  // Plant health scan operations
+  getPlantHealthScan(id: number): Promise<PlantHealthScan | undefined>;
+  getPlantHealthScansByUserId(userId: number): Promise<PlantHealthScan[]>;
+  getPlantHealthScansByPlantId(plantId: number): Promise<PlantHealthScan[]>;
+  createPlantHealthScan(scan: InsertPlantHealthScan): Promise<PlantHealthScan>;
+  updatePlantHealthScan(id: number, scan: Partial<PlantHealthScan>): Promise<PlantHealthScan | undefined>;
+  deletePlantHealthScan(id: number): Promise<boolean>;
+
   // Session management
   sessionStore: Store;
 }
