@@ -154,14 +154,14 @@ const SettingsPage: React.FC = () => {
           <div className="space-y-4">
             <div className="flex flex-col space-y-2">
               <Label>Username</Label>
-              <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
+              <div className="text-sm text-muted-foreground bg-muted p-2 rounded-md">
                 {user?.username || "Loading..."}
               </div>
             </div>
             
             <div className="flex flex-col space-y-2">
               <Label>Email</Label>
-              <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
+              <div className="text-sm text-muted-foreground bg-muted p-2 rounded-md">
                 {user?.email || "No email set"}
               </div>
             </div>
@@ -178,10 +178,10 @@ const SettingsPage: React.FC = () => {
             {weatherPreferences && (
               <div className="flex flex-col space-y-2">
                 <Label>Current Location</Label>
-                <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
+                <div className="text-sm text-muted-foreground bg-muted p-2 rounded-md">
                   {weatherPreferences.location}
                 </div>
-                <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
+                <div className="text-sm text-muted-foreground bg-muted p-2 rounded-md">
                   Unit: {weatherPreferences.unit === "metric" ? "Celsius" : "Fahrenheit"}
                 </div>
               </div>
@@ -197,7 +197,7 @@ const SettingsPage: React.FC = () => {
               )}
               
               {locationStatus === 'requesting' && (
-                <div className="text-sm text-muted-foreground p-2 bg-muted rounded">
+                <div className="text-sm text-muted-foreground p-2 bg-muted rounded-md">
                   Requesting location access...
                 </div>
               )}

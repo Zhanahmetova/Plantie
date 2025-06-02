@@ -50,13 +50,14 @@ export function NotificationSettings() {
           <div className="flex items-center gap-2">
             {permissionStatus === "granted" ? (
               <div className="flex items-center gap-2">
-                <Switch checked={true} disabled />
+                <Switch checked={true} />
                 <span className="text-sm text-green-600">Enabled</span>
               </div>
             ) : permissionStatus === "denied" ? (
               <div className="flex items-center gap-2">
-                <Switch checked={false} disabled />
-                <span className="text-sm text-red-600">Denied</span>
+                <Button onClick={handleEnableNotifications} size="sm" variant="outline">
+                  Enable in Browser
+                </Button>
               </div>
             ) : (
               <Button onClick={handleEnableNotifications} size="sm">
