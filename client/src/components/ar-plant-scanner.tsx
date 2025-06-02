@@ -372,12 +372,12 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
 
       {/* Controls */}
       <div className="p-6 bg-black text-white">
-        <div className="flex justify-center">
+        <div className="flex justify-center gap-4">
           <Button
             onClick={handleScan}
             disabled={isScanning || !!error}
             size="lg"
-            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-full"
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full"
           >
             {isScanning ? (
               <>
@@ -391,11 +391,31 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
               </>
             )}
           </Button>
+          
+          <Button
+            onClick={triggerFileUpload}
+            disabled={isScanning}
+            size="lg"
+            variant="outline"
+            className="border-green-600 text-green-400 hover:bg-green-600 hover:text-white px-6 py-3 rounded-full"
+          >
+            <Upload className="h-5 w-5 mr-2" />
+            Upload Photo
+          </Button>
         </div>
         
         <p className="text-center text-sm text-gray-400 mt-4">
-          Point your camera at a plant and tap scan for instant health diagnosis
+          Point your camera at a plant and tap scan, or upload a photo for instant health diagnosis
         </p>
+        
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileUpload}
+          className="hidden"
+        />
       </div>
 
       {/* Hidden canvas for image capture */}
