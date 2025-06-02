@@ -90,7 +90,7 @@ const PlantCategories: React.FC<PlantCategoriesProps> = ({ className }) => {
           Outdoor
         </button>
       </div>
-      <div className="grid grid-cols-2 gap-3 mb-4 ml-[16px] mr-[16px]">
+      <div className="grid grid-cols-2 gap-3 mb-4 ml-[0px] mr-[0px]">
         {filteredPlants?.map((plant) => (
           <PlantCard key={plant.id} plant={plant} />
         ))}
