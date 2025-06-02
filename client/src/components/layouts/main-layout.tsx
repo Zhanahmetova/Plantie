@@ -16,7 +16,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   return (
     <div className="bg-background min-h-screen">
       <div className="app-container mx-auto pb-20 relative min-h-screen">
-        <div className={cn("px-4", className)}>
+        <div className="px-4 pt-[16px] pb-[16px] pl-[0px] pr-[0px]">
           {children}
         </div>
         
