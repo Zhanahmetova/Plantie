@@ -6,6 +6,9 @@ import WeatherCard from "@/components/weather-card";
 import PlantCategories from "@/components/plant-categories";
 import { BellIcon, LeafIcon } from "@/lib/icons";
 import { format } from "date-fns";
+import { Link } from "wouter";
+import { Card, CardContent } from "@/components/ui/card";
+import { Scan, ChevronRight } from "lucide-react";
 
 const Home: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -49,7 +52,33 @@ const Home: React.FC = () => {
         <div className="px-4">
           <DailySummary className="mb-5" selectedDate={selectedDate} />
 
-          <WeatherCard className="mb-7" />
+          <WeatherCard className="mb-5" />
+
+          {/* AR Plant Scanner Card */}
+          <div className="mb-7">
+            <Link href="/ar-scan">
+              <Card className="bg-gradient-to-r from-green-500 to-green-600 border-0 text-white hover:from-green-600 hover:to-green-700 transition-all duration-200 cursor-pointer transform hover:scale-[1.02]">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="p-3 bg-white/20 rounded-full">
+                        <Scan className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg text-white">
+                          AR Plant Scanner
+                        </h3>
+                        <p className="text-green-100 text-sm">
+                          Scan plants for instant health diagnosis
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-white/80" />
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
 
           <PlantCategories />
         </div>
