@@ -90,49 +90,42 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
   }, []);
 
   const analyzePlantHealth = async (imageData: string): Promise<PlantHealthResult> => {
-    // This would integrate with a plant health analysis API
-    // For now, we'll simulate the analysis process
+    setScanProgress(25);
     
-    // Simulate AI processing time
-    for (let i = 0; i <= 100; i += 10) {
-      setScanProgress(i);
-      await new Promise(resolve => setTimeout(resolve, 200));
-    }
-
-    // Mock result - in production this would come from an AI service
-    return {
-      overallHealth: "good",
-      healthScore: 78,
-      issues: [
-        {
-          type: "nutrient",
-          severity: "low",
-          name: "Nitrogen Deficiency",
-          description: "Slight yellowing in lower leaves indicates mild nitrogen deficiency",
-          treatment: "Apply balanced fertilizer with higher nitrogen content",
-          confidence: 0.85
-        },
-        {
-          type: "watering",
-          severity: "medium",
-          name: "Overwatering Signs",
-          description: "Soil appears oversaturated, some leaf edges show browning",
-          treatment: "Reduce watering frequency and ensure proper drainage",
-          confidence: 0.72
-        }
-      ],
-      recommendations: [
-        "Water only when top inch of soil is dry",
-        "Apply nitrogen-rich fertilizer bi-weekly during growing season",
-        "Ensure pot has drainage holes",
-        "Monitor new growth for improvement"
-      ],
-      identifiedPlant: {
-        name: "Peace Lily",
-        species: "Spathiphyllum wallisii",
-        confidence: 0.92
+    try {
+      // Send image to backend for Plant.ID analysis
+      const response = await fetch("/api/plant-health-scans", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: imageData }),
+      });
+      
+      setScanProgress(75);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to analyze plant");
       }
-    };
+      
+      const result = await response.json();
+      setScanProgress(100);
+      
+      // Transform backend response to match frontend interface
+      return {
+        overallHealth: result.overallHealth,
+        healthScore: result.healthScore,
+        issues: result.issues,
+        recommendations: result.recommendations,
+        identifiedPlant: result.identifiedName ? {
+          name: result.identifiedName,
+          species: result.identifiedSpecies || "",
+          confidence: (result.identificationConfidence || 0) / 100
+        } : undefined
+      };
+    } catch (error) {
+      console.error("Plant analysis failed:", error);
+      throw error;
+    }
   };
 
   const handleScan = async () => {

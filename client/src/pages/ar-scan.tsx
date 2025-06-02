@@ -54,17 +54,9 @@ export default function ARScanPage() {
   });
 
   const handleScanComplete = async (result: PlantHealthResult) => {
-    // Save the scan result
-    await saveScanMutation.mutateAsync({
-      imageUrl: "data:image/jpeg;base64,", // In production, this would be uploaded to storage
-      overallHealth: result.overallHealth,
-      healthScore: result.healthScore,
-      identifiedPlantName: result.identifiedPlant?.name,
-      identifiedPlantSpecies: result.identifiedPlant?.species,
-      identificationConfidence: result.identifiedPlant ? Math.round(result.identifiedPlant.confidence * 100) : null,
-      issues: result.issues,
-      recommendations: result.recommendations,
-    });
+    // The scan result is already saved by the AR scanner component
+    // We just need to close the scanner
+    setShowScanner(false);
   };
 
   const getHealthColor = (health: string) => {
@@ -185,7 +177,7 @@ export default function ARScanPage() {
               <div className="text-center py-8 text-muted-foreground">
                 Loading recent scans...
               </div>
-            ) : recentScans && recentScans.length > 0 ? (
+            ) : recentScans && Array.isArray(recentScans) && recentScans.length > 0 ? (
               <div className="space-y-4">
                 {recentScans.slice(0, 5).map((scan: any, index: number) => (
                   <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
