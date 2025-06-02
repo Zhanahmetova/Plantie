@@ -779,6 +779,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Plant health scan endpoints
+  app.get("/api/plant-health-scans", ensureAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as any).id;
+      const scans = await storage.getPlantHealthScansByUserId(userId);
+      res.json(scans);
+    } catch (error) {
+      console.error("Error fetching plant health scans:", error);
+      res.status(500).json({ message: "Failed to fetch plant health scans" });
+    }
+  });
+
+  app.post("/api/plant-health-scans", ensureAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as any).id;
+      const { image, plantId } = req.body;
+
+      if (!image) {
+        return res.status(400).json({ message: "Image is required" });
+      }
+
+      // Perform plant identification and health analysis
+      const { identifyPlant, analyzePlantHealth } = await import('./plant-analysis');
+      
+      const identificationResult = await identifyPlant(image);
+      const healthResult = await analyzePlantHealth(image, identificationResult);
+
+      // Create plant health scan record
+      const scanData = {
+        userId,
+        plantId: plantId || null,
+        image,
+        overallHealth: healthResult.overallHealth,
+        healthScore: healthResult.healthScore,
+        issues: healthResult.issues,
+        recommendations: healthResult.recommendations,
+        identifiedName: identificationResult?.name || null,
+        identifiedSpecies: identificationResult?.species || null,
+        identificationConfidence: identificationResult?.confidence || null,
+      };
+
+      const scan = await storage.createPlantHealthScan(scanData);
+      res.status(201).json(scan);
+    } catch (error) {
+      console.error("Error creating plant health scan:", error);
+      res.status(500).json({ message: "Failed to analyze plant health" });
+    }
+  });
+
+  app.get("/api/plant-health-scans/:id", ensureAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as any).id;
+      const scanId = parseInt(req.params.id);
+      
+      const scan = await storage.getPlantHealthScan(scanId);
+      if (!scan || scan.userId !== userId) {
+        return res.status(404).json({ message: "Plant health scan not found" });
+      }
+      
+      res.json(scan);
+    } catch (error) {
+      console.error("Error fetching plant health scan:", error);
+      res.status(500).json({ message: "Failed to fetch plant health scan" });
+    }
+  });
+
+  app.get("/api/plants/:plantId/health-scans", ensureAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as any).id;
+      const plantId = parseInt(req.params.plantId);
+      
+      // Verify plant belongs to user
+      const plant = await storage.getPlant(plantId);
+      if (!plant || plant.userId !== userId) {
+        return res.status(404).json({ message: "Plant not found" });
+      }
+      
+      const scans = await storage.getPlantHealthScansByPlantId(plantId);
+      res.json(scans);
+    } catch (error) {
+      console.error("Error fetching plant health scans:", error);
+      res.status(500).json({ message: "Failed to fetch plant health scans" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

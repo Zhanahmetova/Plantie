@@ -12,6 +12,7 @@ import {
   plantIdentifications,
   plantRecords,
   notifications,
+  plantHealthScans,
   type User, 
   type InsertUser,
   type InsertGoogleUser,
@@ -26,7 +27,9 @@ import {
   type PlantRecord,
   type InsertPlantRecord,
   type Notification,
-  type InsertNotification
+  type InsertNotification,
+  type PlantHealthScan,
+  type InsertPlantHealthScan
 } from '@shared/schema';
 import { IStorage } from './storage';
 
