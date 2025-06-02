@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import { useWeather } from "@/hooks/use-weather";
+import { useWeather, useWeatherPreferences, useLocationPermission, useCreateWeatherPreference, useUpdateWeatherPreference } from "@/hooks/use-weather";
 import { PlusCircleIcon, SunIcon } from "@/lib/icons";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface WeatherCardProps {
   className?: string;
@@ -10,7 +13,15 @@ interface WeatherCardProps {
 const WeatherCard: React.FC<WeatherCardProps> = ({
   className
 }) => {
-  const { data: weather, isLoading } = useWeather();
+  const { data: weather, isLoading: weatherLoading } = useWeather();
+  const { data: preferences, isLoading: preferencesLoading } = useWeatherPreferences();
+  const { locationStatus, coordinates, requestLocation } = useLocationPermission();
+  const createPreferences = useCreateWeatherPreference();
+  const updatePreferences = useUpdateWeatherPreference();
+  
+  const [showLocationSetup, setShowLocationSetup] = useState(false);
+  const [manualLocation, setManualLocation] = useState("");
+  const [unit, setUnit] = useState<"metric" | "imperial">("metric");
   
   if (isLoading) {
     return (
