@@ -25,8 +25,8 @@ interface PlantHealthResult {
 
 export async function identifyPlant(imageBase64: string): Promise<PlantIdentificationResult | null> {
   try {
-    // Remove data URL prefix if present
-    const base64Data = imageBase64.replace(/^data:image\/[a-z]+;base64,/, '');
+    // Ensure the image has the proper data URL format
+    const imageData = imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`;
     
     const response = await fetch(`${PLANT_ID_BASE_URL}/identification`, {
       method: 'POST',
@@ -35,8 +35,10 @@ export async function identifyPlant(imageBase64: string): Promise<PlantIdentific
         'Api-Key': PLANT_ID_API_KEY,
       },
       body: JSON.stringify({
-        images: [base64Data],
-        modifiers: ["crops_fast", "similar_images"],
+        images: [imageData],
+        latitude: 49.207,
+        longitude: 16.608,
+        similar_images: true,
         plant_details: ["common_names", "url", "name_authority", "wiki_description", "taxonomy"]
       })
     });
@@ -66,8 +68,8 @@ export async function identifyPlant(imageBase64: string): Promise<PlantIdentific
 
 export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantIdentificationResult | null): Promise<PlantHealthResult> {
   try {
-    // Remove data URL prefix if present
-    const base64Data = imageBase64.replace(/^data:image\/[a-z]+;base64,/, '');
+    // Ensure the image has the proper data URL format
+    const imageData = imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`;
     
     const response = await fetch(`${PLANT_ID_BASE_URL}/health_assessment`, {
       method: 'POST',
@@ -76,9 +78,10 @@ export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantI
         'Api-Key': PLANT_ID_API_KEY,
       },
       body: JSON.stringify({
-        images: [base64Data],
-        modifiers: ["crops_fast", "similar_images"],
-        disease_details: ["common_names", "url", "description", "treatment", "classification", "cause"]
+        images: [imageData],
+        latitude: 49.207,
+        longitude: 16.608,
+        similar_images: true
       })
     });
 
