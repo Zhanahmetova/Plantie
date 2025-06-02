@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
 const PLANT_ID_API_KEY = "XdKD593MYnx3NKXKWgeFTUzeCDG4D9liAymkGuiYPo7wb2vwru";
-const PLANT_ID_API_URL = "https://plant.id/api_frontend/identify";
+const PLANT_ID_API_URL = "https://plant.id/api/v3/identification";
 
 interface PlantIdentificationResult {
   name: string;
@@ -25,35 +25,38 @@ interface PlantHealthResult {
 
 export async function identifyPlant(imageBase64: string): Promise<PlantIdentificationResult | null> {
   try {
-    // Ensure the image has the proper data URL format
     const imageData = imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`;
     
-    // Debug logging
     console.log('Image data length:', imageData.length);
     console.log('Image data preview:', imageData.substring(0, 100) + '...');
     
+    const payload = {
+      images: [imageData],
+      latitude: 49.207,
+      longitude: 16.608,
+      similar_images: true
+    };
+
     const response = await fetch(PLANT_ID_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Api-Key': PLANT_ID_API_KEY
       },
-      body: JSON.stringify({
-        classification_level: "all",
-        health: "all",
-        images: [imageData],
-        latitude: 43.20055968913299,
-        longitude: 76.893142413728,
-        similar_images: true,
-        symptoms: true
-      })
+      body: JSON.stringify(payload)
     });
 
+    console.log('Plant.ID API response status:', response.status);
+
     if (!response.ok) {
+      const errorText = await response.text();
       console.error('Plant.ID API error:', response.status, response.statusText);
+      console.error('Error response:', errorText);
       return null;
     }
 
     const data = await response.json() as any;
+    console.log('Plant.ID API success response:', JSON.stringify(data, null, 2));
     
     if (data.suggestions && data.suggestions.length > 0) {
       const suggestion = data.suggestions[0];
