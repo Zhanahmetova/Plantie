@@ -102,6 +102,33 @@ const DailySummary: React.FC<DailySummaryProps> = ({
               Forgotten ({forgottenTasks.length})
             </button>
           </>
+        ) : isToday ? (
+          <>
+            <button
+              className={cn(
+                "px-5 py-2.5 rounded-full text-sm font-medium flex items-center whitespace-nowrap transition-colors",
+                activeFilter === "watering"
+                  ? "bg-primary text-white"
+                  : "bg-muted text-foreground",
+              )}
+              onClick={() => setActiveFilter("watering")}
+            >
+              <WateringCanIcon size={16} className="mr-2" />
+              Remaining ({wateringTasks.length + mistingTasks.length})
+            </button>
+            <button
+              className={cn(
+                "px-5 py-2.5 rounded-full text-sm font-medium flex items-center whitespace-nowrap transition-colors",
+                activeFilter === "completed"
+                  ? "bg-green-600 text-white"
+                  : "bg-muted text-foreground",
+              )}
+              onClick={() => setActiveFilter("completed")}
+            >
+              <CheckCircleIcon size={16} className="mr-2" />
+              Completed ({completedTasks.length})
+            </button>
+          </>
         ) : (
           <>
             <button
@@ -186,8 +213,8 @@ const DailySummary: React.FC<DailySummaryProps> = ({
             </div>
           )}
         </>
-      ) : (
-        // Current/future date: show incomplete tasks
+      ) : isToday ? (
+        // Today: show remaining tasks and completed tasks, no forgotten tasks
         <>
           {(activeFilter === "all" || activeFilter === "watering") &&
             wateringTasks.length > 0 && (
@@ -210,16 +237,72 @@ const DailySummary: React.FC<DailySummaryProps> = ({
                 className="mb-3"
               />
             )}
+          
+          {(activeFilter === "all" || activeFilter === "completed") &&
+            completedTasks.length > 0 && (
+              <div className="space-y-3">
+                {activeFilter === "all" && (
+                  <h3 className="text-sm font-medium text-green-600 mt-4">Completed Today</h3>
+                )}
+                <TaskCard
+                  title="Completed Tasks"
+                  description={`${completedTasks.length} tasks completed today`}
+                  progress={100}
+                  type="watering"
+                  className="mb-3 border-green-200 bg-green-50"
+                />
+              </div>
+            )}
+
+          {activeFilter === "watering" && wateringTasks.length === 0 && (
+            <div className="text-center py-6 text-muted-foreground rounded-xl bg-muted/30">
+              No remaining watering tasks for today
+            </div>
+          )}
+          {activeFilter === "completed" && completedTasks.length === 0 && (
+            <div className="text-center py-6 text-muted-foreground rounded-xl bg-muted/30">
+              No completed tasks for today
+            </div>
+          )}
+          {activeFilter === "all" && totalTasks === 0 && (
+            <div className="text-center py-6 text-muted-foreground rounded-xl bg-muted/30">
+              No tasks for today
+            </div>
+          )}
+        </>
+      ) : (
+        // Future date: show scheduled tasks
+        <>
+          {(activeFilter === "all" || activeFilter === "watering") &&
+            wateringTasks.length > 0 && (
+              <TaskCard
+                title="Plant Watering"
+                description={`${wateringTasks.length} Plants scheduled for watering`}
+                progress={0}
+                type="watering"
+                className="mb-3"
+              />
+            )}
+          {(activeFilter === "all" || activeFilter === "misting") &&
+            mistingTasks.length > 0 && (
+              <TaskCard
+                title="Plant Misting"
+                description={`${mistingTasks.length} Plants scheduled for misting`}
+                progress={0}
+                type="misting"
+                className="mb-3"
+              />
+            )}
           {activeFilter !== "all" &&
             ((activeFilter === "watering" && wateringTasks.length === 0) ||
               (activeFilter === "misting" && mistingTasks.length === 0)) && (
               <div className="text-center py-6 text-muted-foreground rounded-xl bg-muted/30">
-                No {activeFilter} tasks for today
+                No {activeFilter} tasks scheduled
               </div>
             )}
           {activeFilter === "all" && totalTasks === 0 && (
             <div className="text-center py-6 text-muted-foreground rounded-xl bg-muted/30">
-              No tasks for today
+              No tasks scheduled for this date
             </div>
           )}
         </>
