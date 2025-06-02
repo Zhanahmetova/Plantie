@@ -12,10 +12,17 @@ import {
 import { z } from "zod";
 import { setupAuth } from "./auth";
 import { Request, Response, NextFunction } from "express";
+import path from "path";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication
   setupAuth(app);
+
+  // Serve service worker with correct MIME type
+  app.get('/firebase-messaging-sw.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.sendFile(path.join(process.cwd(), 'public', 'firebase-messaging-sw.js'));
+  });
 
   // Set up API routes
   
