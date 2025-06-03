@@ -120,7 +120,7 @@ export default function ScanResults() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Plant Health Analysis</h1>
             <p className="text-gray-600">
-              Scanned on {scan.createdAt ? new Date(scan.createdAt).toLocaleDateString() : 'Unknown date'}
+              Scanned on {scan.createdAt ? new Date(scan.createdAt).toLocaleDateString('en-GB') : 'Unknown date'}
             </p>
           </div>
         </div>

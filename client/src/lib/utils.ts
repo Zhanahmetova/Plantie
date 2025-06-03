@@ -33,7 +33,7 @@ export function formatDate(date: Date | string | null): string {
       return "Yesterday";
     }
 
-    return format(dateObj, "MMM dd, yyyy");
+    return format(dateObj, "dd/MM/yyyy");
   } catch (error) {
     console.error("Error formatting date:", error);
     return "Invalid date";
@@ -53,7 +53,7 @@ export function formatShortDate(date: Date | string | null): string {
       return "Invalid date";
     }
 
-    return format(dateObj, "MMM dd");
+    return format(dateObj, "dd/MM");
   } catch (error) {
     console.error("Error formatting short date:", error);
     return "Invalid date";

@@ -195,7 +195,7 @@ export default function ARScanPage() {
                         <span className="text-sm text-muted-foreground">{scan.healthScore}%</span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(scan.createdAt).toLocaleDateString()}
+                        {new Date(scan.createdAt).toLocaleDateString('en-GB')}
                       </p>
                     </div>
                   </div>
