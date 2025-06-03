@@ -832,6 +832,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const identificationResult = await identifyPlant(image);
       console.log('Identification result:', JSON.stringify(identificationResult, null, 2));
       
+      // Check if this is not a plant
+      if (identificationResult?.name === "NOT_A_PLANT") {
+        const plantProb = identificationResult.fullResponse?.is_plant?.probability || 0;
+        const isPlantProbability = Math.round(plantProb * 100);
+        console.log('Not a plant detected - probability:', plantProb, 'as percentage:', isPlantProbability);
+        return res.status(400).json({ 
+          message: "this is not a plant",
+          isPlantProbability: isPlantProbability
+        });
+      }
+      
       // Extract detailed Plant.ID data from the full response BEFORE health analysis
       const plantIdResponse = identificationResult?.fullResponse;
       let allSpeciesSuggestions = null;
@@ -843,15 +854,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const plantProb = plantIdResponse.is_plant?.probability || 0;
         isPlantProbability = Math.round(plantProb * 100);
         console.log('Plant probability:', plantProb, 'as percentage:', isPlantProbability);
-        
-        // Check if is_plant probability is too low (90% or less)
-        if (plantProb <= 0.9) {
-          console.log('Not a plant - probability too low:', plantProb);
-          return res.status(400).json({ 
-            message: "this is not a plant",
-            isPlantProbability: isPlantProbability
-          });
-        }
         
         // Extract all species suggestions with similar images
         if (plantIdResponse.suggestions && plantIdResponse.suggestions.length > 0) {

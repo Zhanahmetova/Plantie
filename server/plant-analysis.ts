@@ -59,6 +59,21 @@ export async function identifyPlant(imageBase64: string): Promise<PlantIdentific
     const data = await response.json() as any;
     console.log('Plant.ID API success response:', JSON.stringify(data, null, 2));
     
+    // Check if this is actually a plant first
+    const isPlantProbability = data.is_plant?.probability || 0;
+    console.log('Is plant probability:', isPlantProbability);
+    
+    if (isPlantProbability <= 0.9) {
+      console.log('Not a plant - probability too low:', isPlantProbability);
+      // Return special result indicating this is not a plant
+      return {
+        name: "NOT_A_PLANT",
+        species: "NOT_A_PLANT", 
+        confidence: 0,
+        fullResponse: data
+      };
+    }
+    
     if (data.suggestions && data.suggestions.length > 0) {
       const suggestion = data.suggestions[0];
       const result: PlantIdentificationResult = {
