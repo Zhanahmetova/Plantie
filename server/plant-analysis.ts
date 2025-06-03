@@ -89,8 +89,6 @@ export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantI
       latitude: 49.207,
       longitude: 16.608,
       similar_images: true,
-      plant_details: ["common_names", "edible_parts", "propagation_methods"],
-      disease_details: ["common_names", "description", "treatment"],
       health: "all"
     };
 

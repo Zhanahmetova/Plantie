@@ -844,9 +844,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Check if is_plant probability is too low (90% or less)
         if (plantProb <= 0.9) {
+          // If it's not a plant, still try to identify what it is from the suggestions
+          let objectName = "unknown object";
+          if (plantIdResponse.suggestions && plantIdResponse.suggestions.length > 0) {
+            objectName = plantIdResponse.suggestions[0].plant_name || "unknown object";
+          }
+          
           return res.status(400).json({ 
             message: "this is not a plant",
-            isPlantProbability: isPlantProbability
+            isPlantProbability: isPlantProbability,
+            detectedObject: objectName
           });
         }
         
