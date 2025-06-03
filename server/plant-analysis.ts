@@ -84,6 +84,12 @@ export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantI
     console.log('Health assessment - Image data length:', imageData.length);
     console.log('Health assessment - Image data preview:', imageData.substring(0, 100) + '...');
     
+    // Only run health assessment if we have confirmed plant identification
+    if (!plantInfo || !plantInfo.fullResponse || !plantInfo.fullResponse.is_plant || plantInfo.fullResponse.is_plant.probability <= 0.9) {
+      console.log('Skipping health assessment - not a confirmed plant');
+      return generateFallbackHealthResult(plantInfo);
+    }
+    
     const payload = {
       images: [imageData],
       latitude: 49.207,

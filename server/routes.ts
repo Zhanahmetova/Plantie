@@ -842,10 +842,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Extract is_plant probability
         const plantProb = plantIdResponse.is_plant?.probability || 0;
         isPlantProbability = Math.round(plantProb * 100);
-        console.log('Plant probability:', isPlantProbability);
+        console.log('Plant probability:', plantProb, 'as percentage:', isPlantProbability);
         
         // Check if is_plant probability is too low (90% or less)
         if (plantProb <= 0.9) {
+          console.log('Not a plant - probability too low:', plantProb);
           return res.status(400).json({ 
             message: "this is not a plant",
             isPlantProbability: isPlantProbability
