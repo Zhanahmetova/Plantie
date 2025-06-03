@@ -64,7 +64,7 @@ export async function identifyPlant(imageBase64: string): Promise<PlantIdentific
     console.log('Is plant probability:', isPlantProbability);
     
     if (isPlantProbability <= 0.9) {
-      console.log('Not a plant - probability too low:', isPlantProbability);
+      console.log('Not a plant - probability too low:', isPlantProbability, 'threshold: 0.9');
       // Return special result indicating this is not a plant
       return {
         name: "NOT_A_PLANT",
@@ -73,6 +73,8 @@ export async function identifyPlant(imageBase64: string): Promise<PlantIdentific
         fullResponse: data
       };
     }
+    
+    console.log('Plant detected - probability above threshold:', isPlantProbability);
     
     if (data.suggestions && data.suggestions.length > 0) {
       const suggestion = data.suggestions[0];
