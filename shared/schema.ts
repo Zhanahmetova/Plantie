@@ -137,6 +137,15 @@ export const plantHealthScans = pgTable("plant_health_scans", {
   identifiedName: varchar("identified_name"),
   identifiedSpecies: varchar("identified_species"),
   identificationConfidence: integer("identification_confidence"),
+  // New fields for detailed Plant.ID data
+  allSpeciesSuggestions: jsonb("all_species_suggestions").$type<{
+    name: string;
+    scientificName: string;
+    probability: number;
+    similarImages: string[];
+  }[]>(),
+  isPlantProbability: integer("is_plant_probability"),
+  plantIdRawResponse: jsonb("plant_id_raw_response"),
   issues: jsonb("issues").notNull().$type<{
     type: "disease" | "pest" | "nutrient" | "watering" | "light";
     severity: "low" | "medium" | "high";

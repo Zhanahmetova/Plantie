@@ -7,6 +7,7 @@ interface PlantIdentificationResult {
   name: string;
   species: string;
   confidence: number;
+  fullResponse?: any;
 }
 
 interface PlantHealthResult {
@@ -60,11 +61,13 @@ export async function identifyPlant(imageBase64: string): Promise<PlantIdentific
     
     if (data.suggestions && data.suggestions.length > 0) {
       const suggestion = data.suggestions[0];
-      return {
+      const result: PlantIdentificationResult = {
         name: suggestion.plant_name || "Unknown Plant",
         species: suggestion.plant_details?.scientific_name || suggestion.plant_name || "Unknown Species",
-        confidence: suggestion.probability || 0
+        confidence: suggestion.probability || 0,
+        fullResponse: data
       };
+      return result;
     }
     
     return null;
