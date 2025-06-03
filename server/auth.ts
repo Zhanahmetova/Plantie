@@ -70,6 +70,12 @@ export function setupAuth(app: Express) {
   
   // Google OAuth Strategy
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    const getCallbackURL = (req: any) => {
+      const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+      const host = req.headers['x-forwarded-host'] || req.get('host');
+      return `${protocol}://${host}/auth/google/callback`;
+    };
+
     passport.use(
       new GoogleStrategy(
         {
@@ -186,10 +192,17 @@ export function setupAuth(app: Express) {
 
   // Google OAuth routes
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    app.get("/auth/google", passport.authenticate("google"));
+    app.get("/auth/google", (req, res, next) => {
+      console.log(`Google OAuth initiated from: ${req.protocol}://${req.get('host')}`);
+      passport.authenticate("google")(req, res, next);
+    });
 
     app.get(
       "/auth/google/callback",
+      (req, res, next) => {
+        console.log(`Google OAuth callback received at: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
+        next();
+      },
       passport.authenticate("google", { 
         failureRedirect: "/auth?error=google-auth-failed",
         successRedirect: "/"
