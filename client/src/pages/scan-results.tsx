@@ -26,6 +26,14 @@ interface PlantHealthScan {
   identifiedName: string | null;
   identifiedSpecies: string | null;
   identificationConfidence: number | null;
+  allSpeciesSuggestions?: Array<{
+    name: string;
+    scientificName: string;
+    probability: number;
+    similarImages: string[];
+  }>;
+  isPlantProbability?: number;
+  plantIdRawResponse?: any;
   createdAt: string;
   updatedAt: string;
 }
@@ -153,8 +161,87 @@ export default function ScanResults() {
           </CardContent>
         </Card>
 
-        {/* Plant Identification */}
-        {scan.identifiedName && (
+        {/* Plant Identification Results */}
+        {scan.isPlantProbability && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Info className="h-5 w-5" />
+                Plant Detection Confidence
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-3">
+                <div className="text-2xl font-bold text-green-600">
+                  {scan.isPlantProbability}%
+                </div>
+                <div className="text-gray-600">
+                  certainty this is a plant
+                </div>
+              </div>
+              <Progress value={scan.isPlantProbability} className="mt-2" />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Detailed Species Identification */}
+        {scan.allSpeciesSuggestions && scan.allSpeciesSuggestions.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Info className="h-5 w-5" />
+                Species Identification Results
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {scan.allSpeciesSuggestions.map((suggestion, index) => (
+                  <div key={index} className={cn(
+                    "p-4 rounded-lg border",
+                    index === 0 ? "bg-green-50 border-green-200" : "bg-gray-50 border-gray-200"
+                  )}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h4 className="font-semibold text-lg">{suggestion.name}</h4>
+                        <p className="text-sm text-gray-600 italic">{suggestion.scientificName}</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xl font-bold text-blue-600">{suggestion.probability}%</div>
+                        <div className="text-xs text-gray-500">probability</div>
+                      </div>
+                    </div>
+                    
+                    <Progress value={suggestion.probability} className="mb-3" />
+                    
+                    {/* Similar Images */}
+                    {suggestion.similarImages && suggestion.similarImages.length > 0 && (
+                      <div>
+                        <h5 className="text-sm font-medium mb-2 text-gray-700">Similar Reference Images:</h5>
+                        <div className="grid grid-cols-3 gap-2">
+                          {suggestion.similarImages.slice(0, 6).map((imageUrl, imgIndex) => (
+                            <img 
+                              key={imgIndex}
+                              src={imageUrl} 
+                              alt={`Similar ${suggestion.name}`}
+                              className="w-full h-20 object-cover rounded border"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Fallback: Basic Plant Identification */}
+        {!scan.allSpeciesSuggestions && scan.identifiedName && (
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

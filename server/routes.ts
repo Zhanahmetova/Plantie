@@ -798,6 +798,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         identifiedName: scan.identifiedName,
         identifiedSpecies: scan.identifiedSpecies,
         identificationConfidence: scan.identificationConfidence,
+        allSpeciesSuggestions: scan.allSpeciesSuggestions,
+        isPlantProbability: scan.isPlantProbability,
+        plantIdRawResponse: scan.plantIdRawResponse,
         createdAt: scan.createdAt,
         updatedAt: scan.updatedAt,
       }));
@@ -829,6 +832,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const identificationResult = await identifyPlant(image);
       const healthResult = await analyzePlantHealth(image, identificationResult);
 
+      // Extract detailed Plant.ID data from the full response
+      const plantIdResponse = identificationResult?.fullResponse;
+      let allSpeciesSuggestions = null;
+      let isPlantProbability = null;
+
+      if (plantIdResponse) {
+        // Extract is_plant probability
+        isPlantProbability = Math.round((plantIdResponse.is_plant?.probability || 0) * 100);
+        
+        // Extract all species suggestions with similar images
+        if (plantIdResponse.suggestions && plantIdResponse.suggestions.length > 0) {
+          allSpeciesSuggestions = plantIdResponse.suggestions.map((suggestion: any) => ({
+            name: suggestion.plant_name || "Unknown",
+            scientificName: suggestion.plant_details?.scientific_name || suggestion.plant_name || "Unknown",
+            probability: Math.round((suggestion.probability || 0) * 100),
+            similarImages: suggestion.similar_images ? suggestion.similar_images.map((img: any) => img.url) : []
+          }));
+        }
+      }
+
       // Create plant health scan record
       const scanData = {
         userId,
@@ -841,6 +864,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         identifiedName: identificationResult?.name || null,
         identifiedSpecies: identificationResult?.species || null,
         identificationConfidence: Math.round((identificationResult?.confidence || 0) * 100),
+        allSpeciesSuggestions,
+        isPlantProbability,
+        plantIdRawResponse: plantIdResponse,
       };
 
       const scan = await storage.createPlantHealthScan(scanData);
@@ -874,6 +900,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         identifiedName: scan.identifiedName,
         identifiedSpecies: scan.identifiedSpecies,
         identificationConfidence: scan.identificationConfidence,
+        allSpeciesSuggestions: scan.allSpeciesSuggestions,
+        isPlantProbability: scan.isPlantProbability,
+        plantIdRawResponse: scan.plantIdRawResponse,
         createdAt: scan.createdAt,
         updatedAt: scan.updatedAt,
       };
