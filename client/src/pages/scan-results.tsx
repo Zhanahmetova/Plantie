@@ -34,16 +34,10 @@ export default function ScanResults() {
   const [, navigate] = useLocation();
   const [match, params] = useRoute("/scan-results/:scanId");
 
-  const { data: scan, isLoading, error } = useQuery({
+  const { data: scan, isLoading, error } = useQuery<PlantHealthScan>({
     queryKey: [`/api/plant-health-scans/${params?.scanId}`],
     enabled: !!params?.scanId,
   });
-
-  // Debug logging to see what data we're getting
-  console.log("Scan data:", scan);
-  console.log("Scan ID from params:", params?.scanId);
-  console.log("Is loading:", isLoading);
-  console.log("Error:", error);
 
   const getHealthColor = (health: string) => {
     switch (health) {
@@ -82,23 +76,29 @@ export default function ScanResults() {
     );
   }
 
-  if (error || !scan) {
+  if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
         <div className="max-w-2xl mx-auto pt-8">
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Scan Results Not Found</h2>
-              <p className="text-gray-600 mb-4">
-                We couldn't find the scan results you're looking for.
-              </p>
-              <Button onClick={() => navigate("/")}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Home
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Scan</h1>
+            <p className="text-gray-600 mb-4">Unable to load the plant health scan.</p>
+            <Button onClick={() => navigate("/")}>Back to Home</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!scan) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
+        <div className="max-w-2xl mx-auto pt-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Scan Not Found</h1>
+            <p className="text-gray-600 mb-4">The requested plant health scan could not be found.</p>
+            <Button onClick={() => navigate("/")}>Back to Home</Button>
+          </div>
         </div>
       </div>
     );
@@ -106,9 +106,9 @@ export default function ScanResults() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
-      <div className="max-w-2xl mx-auto pt-8">
+      <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 mb-6 pt-8">
           <Button 
             variant="ghost" 
             size="sm" 
@@ -120,13 +120,13 @@ export default function ScanResults() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Plant Health Analysis</h1>
             <p className="text-gray-600">
-              Scanned on {scan?.createdAt ? new Date(scan.createdAt).toLocaleDateString() : 'Unknown date'}
+              Scanned on {scan.createdAt ? new Date(scan.createdAt).toLocaleDateString() : 'Unknown date'}
             </p>
           </div>
         </div>
 
         {/* Scan Image */}
-        {scan?.image && (
+        {scan.image && (
           <Card className="mb-6">
             <CardContent className="p-4">
               <img 
@@ -158,53 +158,60 @@ export default function ScanResults() {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Info className="h-5 w-5 text-blue-600" />
+                <Info className="h-5 w-5" />
                 Plant Identification
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-blue-900 font-semibold text-lg">
+              <div className="space-y-2">
+                <div>
+                  <span className="font-semibold">Name: </span>
                   {scan.identifiedName}
-                </p>
+                </div>
+                {scan.identifiedSpecies && (
+                  <div>
+                    <span className="font-semibold">Species: </span>
+                    {scan.identifiedSpecies}
+                  </div>
+                )}
                 {scan.identificationConfidence && (
-                  <p className="text-blue-600 text-sm mt-1">
-                    Confidence: {Math.round(scan.identificationConfidence * 100)}%
-                  </p>
+                  <div>
+                    <span className="font-semibold">Confidence: </span>
+                    {scan.identificationConfidence}%
+                  </div>
                 )}
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Health Issues */}
-        {scan.issues && scan.issues.length > 0 && (
+        {/* Issues */}
+        {scan.issues && Array.isArray(scan.issues) && scan.issues.length > 0 && (
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-amber-500" />
-                Detected Issues ({scan.issues.length})
+                <AlertTriangle className="h-5 w-5" />
+                Detected Issues
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {scan.issues.map((issue: any, index: number) => (
-                  <div key={index} className="border rounded-lg p-4">
+                {scan.issues.map((issue, index) => (
+                  <div key={index} className="p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium">{issue.name}</h4>
+                      <h4 className="font-semibold">{issue.name}</h4>
                       <Badge className={getSeverityColor(issue.severity)}>
-                        {issue.severity} severity
+                        {issue.severity}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-600 mb-3">{issue.description}</p>
-                    <div className="bg-green-50 p-3 rounded-lg">
-                      <p className="text-sm text-green-800">
-                        <strong>Treatment:</strong> {issue.treatment}
-                      </p>
+                    <p className="text-gray-600 text-sm mb-2">{issue.description}</p>
+                    <div className="text-sm">
+                      <span className="font-medium">Treatment: </span>
+                      {issue.treatment}
                     </div>
-                    <p className="text-xs text-gray-500 mt-2">
+                    <div className="text-xs text-gray-500 mt-1">
                       Confidence: {Math.round(issue.confidence * 100)}%
-                    </p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -213,20 +220,20 @@ export default function ScanResults() {
         )}
 
         {/* Recommendations */}
-        {scan.recommendations && scan.recommendations.length > 0 && (
+        {scan.recommendations && Array.isArray(scan.recommendations) && scan.recommendations.length > 0 && (
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                Care Recommendations
+                <CheckCircle className="h-5 w-5" />
+                Recommendations
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-3">
-                {scan.recommendations.map((recommendation: string, index: number) => (
-                  <li key={index} className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0" />
-                    <span className="text-sm text-gray-700">{recommendation}</span>
+              <ul className="space-y-2">
+                {scan.recommendations.map((recommendation, index) => (
+                  <li key={index} className="flex items-start gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-gray-700">{recommendation}</span>
                   </li>
                 ))}
               </ul>
@@ -234,11 +241,11 @@ export default function ScanResults() {
           </Card>
         )}
 
-        {/* Actions */}
-        <div className="flex gap-3 mb-8">
+        {/* Action Buttons */}
+        <div className="flex gap-4 mb-8">
           <Button 
             onClick={() => navigate("/ar-scan")} 
-            className="flex-1"
+            className="flex-1 bg-green-600 hover:bg-green-700"
           >
             <Camera className="h-4 w-4 mr-2" />
             Scan Another Plant
