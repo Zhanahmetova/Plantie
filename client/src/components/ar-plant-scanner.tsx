@@ -39,6 +39,8 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const [scanResult, setScanResult] = useState<PlantHealthResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [scanMode, setScanMode] = useState<'camera' | 'upload'>('camera');
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -87,6 +89,9 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
       return;
     }
 
+    setScanMode('upload');
+    setIsUploading(true);
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const imageData = e.target?.result as string;
@@ -118,11 +123,18 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
       if (result.scanId) {
         navigate(`/scan-results/${result.scanId}`);
       }
-    } catch (err) {
-      setError("Failed to analyze plant. Please try again.");
+    } catch (err: any) {
+      // Handle "this is not a plant" error specifically
+      if (err.message && err.message.includes("this is not a plant")) {
+        setError("This is not a plant. Please try scanning an actual plant or upload a plant photo.");
+      } else {
+        setError("Failed to analyze plant. Please try again.");
+      }
     } finally {
       setIsScanning(false);
+      setIsUploading(false);
       setScanProgress(0);
+      setScanMode('camera');
     }
   };
 
@@ -188,6 +200,8 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
 
   const handleScan = async () => {
     if (!videoRef.current) return;
+    
+    setScanMode('camera');
     
     const imageData = captureFrame();
     if (!imageData) {
@@ -331,12 +345,32 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
       <div className="flex-1 relative overflow-hidden">
         {error ? (
           <div className="flex items-center justify-center h-full bg-gray-900 text-white">
-            <div className="text-center">
+            <div className="text-center max-w-sm px-6">
               <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-              <p>{error}</p>
-              <Button onClick={startCamera} className="mt-4" variant="outline">
-                Retry Camera Access
-              </Button>
+              <p className="mb-6 text-lg">{error}</p>
+              <div className="space-y-3">
+                <Button 
+                  onClick={() => {
+                    setError(null);
+                    startCamera();
+                  }} 
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Camera className="h-4 w-4 mr-2" />
+                  Try Camera Again
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setError(null);
+                    triggerFileUpload();
+                  }} 
+                  variant="outline" 
+                  className="w-full border-white text-white hover:bg-white hover:text-black"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Photo Instead
+                </Button>
+              </div>
             </div>
           </div>
         ) : (
@@ -359,10 +393,14 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
                   <div className="absolute bottom-0 left-0 w-8 h-8 border-l-4 border-b-4 border-green-500"></div>
                   <div className="absolute bottom-0 right-0 w-8 h-8 border-r-4 border-b-4 border-green-500"></div>
                   
-                  {isScanning && (
+                  {(isScanning || isUploading) && (
                     <div className="absolute inset-0 bg-green-500 bg-opacity-20 rounded-lg animate-pulse">
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <Loader2 className="h-8 w-8 text-white animate-spin" />
+                        {scanMode === 'upload' ? (
+                          <Upload className="h-8 w-8 text-white animate-bounce" />
+                        ) : (
+                          <Loader2 className="h-8 w-8 text-white animate-spin" />
+                        )}
                       </div>
                     </div>
                   )}
@@ -371,9 +409,13 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
                 {/* Instructions */}
                 <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 text-center text-white">
                   <p className="text-sm">
-                    {isScanning ? "Analyzing plant health..." : "Position plant within the frame"}
+                    {isScanning && scanMode === 'upload' 
+                      ? "Processing uploaded photo..." 
+                      : isScanning 
+                        ? "Analyzing plant health..." 
+                        : "Position plant within the frame"}
                   </p>
-                  {isScanning && (
+                  {(isScanning || isUploading) && (
                     <div className="mt-2">
                       <Progress value={scanProgress} className="w-64" />
                       <p className="text-xs mt-1">{scanProgress}% complete</p>
