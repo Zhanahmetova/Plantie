@@ -839,7 +839,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (plantIdResponse) {
         // Extract is_plant probability
-        isPlantProbability = Math.round((plantIdResponse.is_plant?.probability || 0) * 100);
+        const plantProb = plantIdResponse.is_plant?.probability || 0;
+        isPlantProbability = Math.round(plantProb * 100);
+        
+        // Check if is_plant probability is too low (90% or less)
+        if (plantProb <= 0.9) {
+          return res.status(400).json({ 
+            message: "this is not a plant",
+            isPlantProbability: isPlantProbability
+          });
+        }
         
         // Extract all species suggestions with similar images
         if (plantIdResponse.suggestions && plantIdResponse.suggestions.length > 0) {

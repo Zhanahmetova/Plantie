@@ -157,6 +157,10 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
       
       if (!response.ok) {
         const errorData = await response.json();
+        // Handle "this is not a plant" error specifically
+        if (errorData.message === "this is not a plant") {
+          throw new Error("This is not a plant. Please scan a plant to continue.");
+        }
         throw new Error(errorData.message || "Failed to analyze plant");
       }
       

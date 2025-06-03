@@ -184,45 +184,35 @@ export default function ScanResults() {
           </Card>
         )}
 
-        {/* Detailed Species Identification */}
+        {/* Plant Species Identification */}
         {scan.allSpeciesSuggestions && scan.allSpeciesSuggestions.length > 0 && (
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Info className="h-5 w-5" />
-                Species Identification Results
+                Plant Identification
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {scan.allSpeciesSuggestions.map((suggestion, index) => (
-                  <div key={index} className={cn(
-                    "p-4 rounded-lg border",
-                    index === 0 ? "bg-green-50 border-green-200" : "bg-gray-50 border-gray-200"
-                  )}>
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <h4 className="font-semibold text-lg">{suggestion.name}</h4>
-                        <p className="text-sm text-gray-600 italic">{suggestion.scientificName}</p>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xl font-bold text-blue-600">{suggestion.probability}%</div>
-                        <div className="text-xs text-gray-500">probability</div>
-                      </div>
+                {/* Primary identification in specified format */}
+                {scan.allSpeciesSuggestions[0] && (
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="text-lg font-semibold text-green-800 mb-2">
+                      This is "{scan.allSpeciesSuggestions[0].name}" with {scan.allSpeciesSuggestions[0].probability}% of probability.
                     </div>
+                    <p className="text-sm text-gray-600 italic mb-3">{scan.allSpeciesSuggestions[0].scientificName}</p>
                     
-                    <Progress value={suggestion.probability} className="mb-3" />
-                    
-                    {/* Similar Images */}
-                    {suggestion.similarImages && suggestion.similarImages.length > 0 && (
+                    {/* Similar Images for primary identification */}
+                    {scan.allSpeciesSuggestions[0].similarImages && scan.allSpeciesSuggestions[0].similarImages.length > 0 && (
                       <div>
-                        <h5 className="text-sm font-medium mb-2 text-gray-700">Similar Reference Images:</h5>
+                        <h5 className="text-sm font-medium mb-2 text-gray-700">Reference Images:</h5>
                         <div className="grid grid-cols-3 gap-2">
-                          {suggestion.similarImages.slice(0, 6).map((imageUrl, imgIndex) => (
+                          {scan.allSpeciesSuggestions[0].similarImages.slice(0, 6).map((imageUrl, imgIndex) => (
                             <img 
                               key={imgIndex}
                               src={imageUrl} 
-                              alt={`Similar ${suggestion.name}`}
+                              alt={`Reference ${scan.allSpeciesSuggestions[0].name}`}
                               className="w-full h-20 object-cover rounded border"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
@@ -234,7 +224,47 @@ export default function ScanResults() {
                       </div>
                     )}
                   </div>
-                ))}
+                )}
+
+                {/* Other possible species */}
+                {scan.allSpeciesSuggestions.length > 1 && (
+                  <div>
+                    <h4 className="font-medium text-gray-700 mb-2">Other Possibilities:</h4>
+                    <div className="space-y-3">
+                      {scan.allSpeciesSuggestions.slice(1).map((suggestion, index) => (
+                        <div key={index} className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <div>
+                              <h5 className="font-medium">{suggestion.name}</h5>
+                              <p className="text-xs text-gray-600 italic">{suggestion.scientificName}</p>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-blue-600">{suggestion.probability}%</div>
+                            </div>
+                          </div>
+                          
+                          {/* Similar Images for alternative species */}
+                          {suggestion.similarImages && suggestion.similarImages.length > 0 && (
+                            <div className="grid grid-cols-4 gap-1 mt-2">
+                              {suggestion.similarImages.slice(0, 4).map((imageUrl, imgIndex) => (
+                                <img 
+                                  key={imgIndex}
+                                  src={imageUrl} 
+                                  alt={`Reference ${suggestion.name}`}
+                                  className="w-full h-12 object-cover rounded border"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

@@ -81,17 +81,19 @@ export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantI
   try {
     const imageData = imageBase64.startsWith('data:') ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`;
     
-    console.log('Health analysis - Image data length:', imageData.length);
-    console.log('Health analysis - Image data preview:', imageData.substring(0, 100) + '...');
+    console.log('Health assessment - Image data length:', imageData.length);
+    console.log('Health assessment - Image data preview:', imageData.substring(0, 100) + '...');
     
     const payload = {
       images: [imageData],
       latitude: 49.207,
       longitude: 16.608,
-      similar_images: true
+      similar_images: false,
+      plant_details: ["common_names", "edible_parts", "propagation_methods"],
+      disease_details: ["common_names", "description", "treatment"]
     };
 
-    const response = await fetch(PLANT_ID_API_URL, {
+    const response = await fetch("https://plant.id/api/v3/health_assessment", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -100,7 +102,7 @@ export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantI
       body: JSON.stringify(payload)
     });
 
-    console.log('Plant.ID Health API response status:', response.status);
+    console.log('Plant.ID Health Assessment API response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
