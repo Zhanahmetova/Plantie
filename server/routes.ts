@@ -830,17 +830,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { identifyPlant, analyzePlantHealth } = await import('./plant-analysis');
       
       const identificationResult = await identifyPlant(image);
-      const healthResult = await analyzePlantHealth(image, identificationResult);
-
-      // Extract detailed Plant.ID data from the full response
+      console.log('Identification result:', JSON.stringify(identificationResult, null, 2));
+      
+      // Extract detailed Plant.ID data from the full response BEFORE health analysis
       const plantIdResponse = identificationResult?.fullResponse;
       let allSpeciesSuggestions = null;
       let isPlantProbability = null;
 
       if (plantIdResponse) {
+        console.log('Processing Plant.ID response data...');
         // Extract is_plant probability
         const plantProb = plantIdResponse.is_plant?.probability || 0;
         isPlantProbability = Math.round(plantProb * 100);
+        console.log('Plant probability:', isPlantProbability);
         
         // Check if is_plant probability is too low (90% or less)
         if (plantProb <= 0.9) {
@@ -852,14 +854,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Extract all species suggestions with similar images
         if (plantIdResponse.suggestions && plantIdResponse.suggestions.length > 0) {
+          console.log('Processing species suggestions...');
           allSpeciesSuggestions = plantIdResponse.suggestions.map((suggestion: any) => ({
             name: suggestion.plant_name || "Unknown",
             scientificName: suggestion.plant_details?.scientific_name || suggestion.plant_name || "Unknown",
             probability: Math.round((suggestion.probability || 0) * 100),
             similarImages: suggestion.similar_images ? suggestion.similar_images.map((img: any) => img.url) : []
           }));
+          console.log('Species suggestions processed:', allSpeciesSuggestions.length);
         }
       }
+
+      const healthResult = await analyzePlantHealth(image, identificationResult);
 
       // Create plant health scan record
       const scanData = {
@@ -878,7 +884,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         plantIdRawResponse: plantIdResponse,
       };
 
+      console.log('Scan data being saved:', {
+        identifiedName: scanData.identifiedName,
+        identifiedSpecies: scanData.identifiedSpecies,
+        identificationConfidence: scanData.identificationConfidence,
+        allSpeciesSuggestions: scanData.allSpeciesSuggestions ? scanData.allSpeciesSuggestions.length : 'null',
+        isPlantProbability: scanData.isPlantProbability,
+        hasRawResponse: !!scanData.plantIdRawResponse
+      });
+
       const scan = await storage.createPlantHealthScan(scanData);
+      console.log('Scan saved with ID:', scan.id);
       res.status(201).json(scan);
     } catch (error) {
       console.error("Error creating plant health scan:", error);

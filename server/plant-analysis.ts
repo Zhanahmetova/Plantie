@@ -89,9 +89,8 @@ export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantI
       latitude: 49.207,
       longitude: 16.608,
       similar_images: true,
-      plant_details: ["common_names", "edible_parts", "propagation_methods"],
-      disease_details: ["common_names", "description", "treatment"],
-      health: "all"
+      health: "all",
+      symptoms: true
     };
 
     const response = await fetch("https://plant.id/api/v3/health_assessment", {
@@ -109,6 +108,7 @@ export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantI
       const errorText = await response.text();
       console.error('Plant.ID Health API error:', response.status, response.statusText);
       console.error('Health API error response:', errorText);
+      // Still return identification data even if health assessment fails
       return generateFallbackHealthResult(plantInfo);
     }
 
