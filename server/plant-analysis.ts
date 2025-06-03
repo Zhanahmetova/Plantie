@@ -59,23 +59,6 @@ export async function identifyPlant(imageBase64: string): Promise<PlantIdentific
     const data = await response.json() as any;
     console.log('Plant.ID API success response:', JSON.stringify(data, null, 2));
     
-    // Check if this is actually a plant first
-    const isPlantProbability = data.is_plant?.probability || 0;
-    console.log('Is plant probability:', isPlantProbability);
-    
-    if (isPlantProbability <= 0.9) {
-      console.log('Not a plant - probability too low:', isPlantProbability, 'threshold: 0.9');
-      // Return special result indicating this is not a plant
-      return {
-        name: "NOT_A_PLANT",
-        species: "NOT_A_PLANT", 
-        confidence: 0,
-        fullResponse: data
-      };
-    }
-    
-    console.log('Plant detected - probability above threshold:', isPlantProbability);
-    
     if (data.suggestions && data.suggestions.length > 0) {
       const suggestion = data.suggestions[0];
       const result: PlantIdentificationResult = {
@@ -101,19 +84,14 @@ export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantI
     console.log('Health assessment - Image data length:', imageData.length);
     console.log('Health assessment - Image data preview:', imageData.substring(0, 100) + '...');
     
-    // Only run health assessment if we have confirmed plant identification
-    if (!plantInfo || !plantInfo.fullResponse || !plantInfo.fullResponse.is_plant || plantInfo.fullResponse.is_plant.probability <= 0.9) {
-      console.log('Skipping health assessment - not a confirmed plant');
-      return generateFallbackHealthResult(plantInfo);
-    }
-    
     const payload = {
       images: [imageData],
       latitude: 49.207,
       longitude: 16.608,
       similar_images: true,
-      health: "all",
-      symptoms: true
+      plant_details: ["common_names", "edible_parts", "propagation_methods"],
+      disease_details: ["common_names", "description", "treatment"],
+      health: "all"
     };
 
     const response = await fetch("https://plant.id/api/v3/health_assessment", {
@@ -131,7 +109,6 @@ export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantI
       const errorText = await response.text();
       console.error('Plant.ID Health API error:', response.status, response.statusText);
       console.error('Health API error response:', errorText);
-      // Still return identification data even if health assessment fails
       return generateFallbackHealthResult(plantInfo);
     }
 
