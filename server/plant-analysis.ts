@@ -88,9 +88,10 @@ export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantI
       images: [imageData],
       latitude: 49.207,
       longitude: 16.608,
-      similar_images: false,
+      similar_images: true,
       plant_details: ["common_names", "edible_parts", "propagation_methods"],
-      disease_details: ["common_names", "description", "treatment"]
+      disease_details: ["common_names", "description", "treatment"],
+      health: "all"
     };
 
     const response = await fetch("https://plant.id/api/v3/health_assessment", {
@@ -112,62 +113,78 @@ export async function analyzePlantHealth(imageBase64: string, plantInfo?: PlantI
     }
 
     const data = await response.json() as any;
+    console.log('Plant.ID Health Assessment API success response:', JSON.stringify(data, null, 2));
     
-    if (data.health_assessment) {
-      const healthData = data.health_assessment;
-      
-      // Calculate overall health score
-      const isHealthy = healthData.is_healthy?.probability || 0;
-      const healthScore = Math.round(isHealthy * 100);
-      
-      // Determine overall health category
-      let overallHealth: "excellent" | "good" | "fair" | "poor" | "critical";
-      if (healthScore >= 90) overallHealth = "excellent";
-      else if (healthScore >= 75) overallHealth = "good";
-      else if (healthScore >= 60) overallHealth = "fair";
-      else if (healthScore >= 40) overallHealth = "poor";
-      else overallHealth = "critical";
-
-      // Process diseases and issues
+    // Parse the health assessment response structure
+    if (data.result) {
+      const result = data.result;
       const issues = [];
       const recommendations = [];
+      let overallHealth: "excellent" | "good" | "fair" | "poor" | "critical" = "good";
+      let healthScore = 85;
 
-      if (healthData.diseases && healthData.diseases.length > 0) {
-        for (const disease of healthData.diseases.slice(0, 3)) { // Limit to top 3
-          if (disease.probability > 0.3) { // Only include confident predictions
-            const severity: "low" | "medium" | "high" = disease.probability > 0.7 ? "high" : disease.probability > 0.5 ? "medium" : "low";
+      // Check if plant is healthy
+      if (result.is_healthy) {
+        const healthyProb = result.is_healthy.probability || 0;
+        healthScore = Math.round(healthyProb * 100);
+        
+        if (healthyProb >= 0.9) overallHealth = "excellent";
+        else if (healthyProb >= 0.75) overallHealth = "good";
+        else if (healthyProb >= 0.6) overallHealth = "fair";
+        else if (healthyProb >= 0.4) overallHealth = "poor";
+        else overallHealth = "critical";
+      }
+
+      // Process disease suggestions
+      if (result.disease && result.disease.suggestions) {
+        for (const disease of result.disease.suggestions.slice(0, 3)) {
+          if (disease.probability > 0.1) { // Only show diseases with >10% probability
+            const severity: "low" | "medium" | "high" = disease.probability > 0.7 ? "high" : disease.probability > 0.4 ? "medium" : "low";
             
             issues.push({
               type: "disease" as const,
               severity,
               name: disease.name || "Unknown Disease",
-              description: disease.disease_details?.description || "Disease detected in plant",
-              treatment: disease.disease_details?.treatment?.biological?.[0] || disease.disease_details?.treatment?.chemical?.[0] || "Consult a plant specialist",
-              confidence: disease.probability
+              description: disease.details?.description || "Disease symptoms detected",
+              treatment: Array.isArray(disease.details?.treatment?.biological) 
+                ? disease.details.treatment.biological.join(", ") 
+                : Array.isArray(disease.details?.treatment?.chemical)
+                ? disease.details.treatment.chemical.join(", ")
+                : "Consult a plant specialist for treatment options",
+              confidence: Math.round(disease.probability * 100)
             });
           }
         }
       }
 
-      // Add general care recommendations
-      if (healthScore < 80) {
-        recommendations.push("Monitor plant closely for changes");
-        recommendations.push("Ensure proper watering schedule");
-        recommendations.push("Check light conditions");
-        recommendations.push("Inspect for pests regularly");
+      // Add recommendations based on health status
+      if (healthScore >= 85) {
+        recommendations.push("Your plant appears to be in excellent health!");
+        recommendations.push("Continue your current care routine");
+        recommendations.push("Monitor regularly for any changes");
+      } else if (healthScore >= 70) {
+        recommendations.push("Your plant is generally healthy");
+        recommendations.push("Monitor watering and light conditions");
+        recommendations.push("Check for early signs of stress");
+      } else {
+        recommendations.push("Your plant may need attention");
+        recommendations.push("Check watering schedule and drainage");
+        recommendations.push("Ensure adequate lighting");
+        recommendations.push("Inspect for pests and diseases");
       }
 
       if (issues.length > 0) {
-        recommendations.push("Remove affected leaves if possible");
-        recommendations.push("Improve air circulation");
-        recommendations.push("Avoid watering leaves directly");
+        overallHealth = issues.some(i => i.severity === "high") ? "poor" : "fair";
+        healthScore = Math.max(30, healthScore - (issues.length * 15));
+        recommendations.push("Address identified issues promptly");
+        recommendations.push("Improve growing conditions");
       }
 
       return {
         overallHealth,
         healthScore,
         issues,
-        recommendations: recommendations.length > 0 ? recommendations : ["Plant appears healthy! Continue regular care routine."]
+        recommendations
       };
     }
     

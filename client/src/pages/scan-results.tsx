@@ -204,7 +204,7 @@ export default function ScanResults() {
                     <p className="text-sm text-gray-600 italic mb-3">{scan.allSpeciesSuggestions[0].scientificName}</p>
                     
                     {/* Similar Images for primary identification */}
-                    {scan.allSpeciesSuggestions[0].similarImages && scan.allSpeciesSuggestions[0].similarImages.length > 0 && (
+                    {scan.allSpeciesSuggestions && scan.allSpeciesSuggestions[0]?.similarImages && scan.allSpeciesSuggestions[0].similarImages.length > 0 && (
                       <div>
                         <h5 className="text-sm font-medium mb-2 text-gray-700">Reference Images:</h5>
                         <div className="grid grid-cols-3 gap-2">
@@ -212,7 +212,7 @@ export default function ScanResults() {
                             <img 
                               key={imgIndex}
                               src={imageUrl} 
-                              alt={`Reference ${scan.allSpeciesSuggestions[0].name}`}
+                              alt={`Reference ${scan.allSpeciesSuggestions[0]?.name || 'plant'}`}
                               className="w-full h-20 object-cover rounded border"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
@@ -262,6 +262,74 @@ export default function ScanResults() {
                           )}
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Plant Details Card */}
+        {scan.allSpeciesSuggestions && scan.allSpeciesSuggestions[0] && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Info className="h-5 w-5" />
+                Plant Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-2">Common Name</h4>
+                    <p className="text-gray-900">{scan.allSpeciesSuggestions[0].name}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-2">Scientific Name</h4>
+                    <p className="text-gray-900 italic">{scan.allSpeciesSuggestions[0].scientificName}</p>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-700 mb-2">Identification Confidence</h4>
+                    <div className="flex items-center gap-2">
+                      <div className="font-bold text-blue-600">{scan.allSpeciesSuggestions[0].probability}%</div>
+                      <Progress value={scan.allSpeciesSuggestions[0].probability} className="flex-1" />
+                    </div>
+                  </div>
+                  {scan.isPlantProbability && (
+                    <div>
+                      <h4 className="font-semibold text-gray-700 mb-2">Plant Detection</h4>
+                      <div className="flex items-center gap-2">
+                        <div className="font-bold text-green-600">{scan.isPlantProbability}%</div>
+                        <Progress value={scan.isPlantProbability} className="flex-1" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Additional plant information from Plant.ID response */}
+                {scan.plantIdRawResponse && scan.plantIdRawResponse.result && (
+                  <div className="mt-4 pt-4 border-t">
+                    <h4 className="font-semibold text-gray-700 mb-3">Additional Information</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      {scan.plantIdRawResponse.result.classification && (
+                        <div>
+                          <span className="font-medium text-gray-600">Classification:</span>
+                          <p className="text-gray-800 mt-1">
+                            {Object.entries(scan.plantIdRawResponse.result.classification.suggestions[0] || {})
+                              .filter(([key]) => !['id', 'probability', 'similar_images'].includes(key))
+                              .map(([key, value]) => `${key}: ${value}`)
+                              .join(', ')}
+                          </p>
+                        </div>
+                      )}
+                      <div>
+                        <span className="font-medium text-gray-600">Analysis Date:</span>
+                        <p className="text-gray-800 mt-1">
+                          {scan.createdAt ? new Date(scan.createdAt).toLocaleDateString('en-GB') : 'Unknown'}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
