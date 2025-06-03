@@ -111,6 +111,9 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
       setScanResult(result);
       onScanComplete(result);
       
+      // Stop camera before navigation
+      stopCamera();
+      
       // Navigate to results page after successful scan
       if (result.scanId) {
         navigate(`/scan-results/${result.scanId}`);
@@ -217,7 +220,7 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
         <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-xl font-bold">Plant Health Analysis</CardTitle>
-            <Button variant="ghost" size="sm" onClick={onClose}>
+            <Button variant="ghost" size="sm" onClick={() => { stopCamera(); onClose(); }}>
               <X className="h-4 w-4" />
             </Button>
           </CardHeader>
@@ -297,10 +300,10 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
             </div>
 
             <div className="flex gap-2">
-              <Button onClick={() => setScanResult(null)} variant="outline" className="flex-1">
+              <Button onClick={() => { setScanResult(null); startCamera(); }} variant="outline" className="flex-1">
                 Scan Again
               </Button>
-              <Button onClick={onClose} className="flex-1">
+              <Button onClick={() => { stopCamera(); onClose(); }} className="flex-1">
                 Done
               </Button>
             </div>
@@ -315,7 +318,7 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
       {/* Header */}
       <div className="flex items-center justify-between p-4 bg-black text-white">
         <h2 className="text-lg font-semibold">AR Plant Scanner</h2>
-        <Button variant="ghost" size="sm" onClick={onClose} className="text-white hover:bg-gray-800">
+        <Button variant="ghost" size="sm" onClick={() => { stopCamera(); onClose(); }} className="text-white hover:bg-gray-800">
           <X className="h-4 w-4" />
         </Button>
       </div>
