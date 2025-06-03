@@ -7,14 +7,43 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, CheckCircle, AlertTriangle, Info, Camera, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+interface PlantHealthScan {
+  id: number;
+  userId: number;
+  plantId: number | null;
+  image: string;
+  overallHealth: string;
+  healthScore: number;
+  issues: Array<{
+    type: string;
+    severity: string;
+    name: string;
+    description: string;
+    treatment: string;
+    confidence: number;
+  }>;
+  recommendations: string[];
+  identifiedName: string | null;
+  identifiedSpecies: string | null;
+  identificationConfidence: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function ScanResults() {
   const [, navigate] = useLocation();
   const [match, params] = useRoute("/scan-results/:scanId");
 
   const { data: scan, isLoading, error } = useQuery({
-    queryKey: ["/api/plant-health-scans", params?.scanId],
+    queryKey: [`/api/plant-health-scans/${params?.scanId}`],
     enabled: !!params?.scanId,
   });
+
+  // Debug logging to see what data we're getting
+  console.log("Scan data:", scan);
+  console.log("Scan ID from params:", params?.scanId);
+  console.log("Is loading:", isLoading);
+  console.log("Error:", error);
 
   const getHealthColor = (health: string) => {
     switch (health) {
@@ -91,13 +120,13 @@ export default function ScanResults() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Plant Health Analysis</h1>
             <p className="text-gray-600">
-              Scanned on {new Date(scan.createdAt).toLocaleDateString()}
+              Scanned on {scan?.createdAt ? new Date(scan.createdAt).toLocaleDateString() : 'Unknown date'}
             </p>
           </div>
         </div>
 
         {/* Scan Image */}
-        {scan.image && (
+        {scan?.image && (
           <Card className="mb-6">
             <CardContent className="p-4">
               <img 
