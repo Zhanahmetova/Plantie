@@ -36,7 +36,7 @@ export const plants = pgTable("plants", {
   species: varchar("species", { length: 255 }).notNull(),
   family: varchar("family", { length: 255 }).notNull(),
   category: varchar("category", { length: 100 }).notNull(),
-  image: varchar("image", { length: 500 }).notNull(),
+  image: text("image").notNull(),
   wateringFrequency: integer("watering_frequency").notNull(),
   lastWatered: timestamp("last_watered"),
   lastFertilized: timestamp("last_fertilized"),
