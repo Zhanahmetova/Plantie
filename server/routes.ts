@@ -76,15 +76,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/plants', ensureAuthenticated, async (req, res) => {
     try {
       const userId = req.user!.id;
-      const parsedData = insertPlantSchema.parse({
+      
+      // Log the incoming data for debugging
+      console.log('Plant creation - received data:', JSON.stringify(req.body, null, 2));
+      
+      const plantData = {
         ...req.body,
         userId
-      });
+      };
+      
+      console.log('Plant creation - data to validate:', JSON.stringify(plantData, null, 2));
+      
+      const parsedData = insertPlantSchema.parse(plantData);
       
       const plant = await storage.createPlant(parsedData);
       res.status(201).json(plant);
     } catch (error) {
+      console.error('Plant creation error:', error);
       if (error instanceof z.ZodError) {
+        console.log('Validation errors:', JSON.stringify(error.errors, null, 2));
         return res.status(400).json({ message: 'Invalid plant data', errors: error.errors });
       }
       res.status(500).json({ message: 'Failed to create plant' });
