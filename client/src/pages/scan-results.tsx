@@ -414,26 +414,41 @@ export default function ScanResults() {
         )}
 
         {/* Recommendations */}
-        {scan.recommendations && Array.isArray(scan.recommendations) && scan.recommendations.length > 0 && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5" />
-                Recommendations
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {scan.recommendations.map((recommendation, index) => (
-                  <li key={index} className="flex items-start gap-2">
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5" />
+              Рекомендации
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {scan.recommendations && Array.isArray(scan.recommendations) && scan.recommendations.length > 0 ? (
+                scan.recommendations.map((recommendation, index) => (
+                  <div key={index} className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
                     <span className="text-gray-700">{recommendation}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        )}
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-gray-700">Ваше растение выглядит отлично!</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-gray-700">Продолжайте текущий уход</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-gray-700">Регулярно проверяйте на изменения</span>
+                  </div>
+                </>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Action Buttons */}
         <div className="flex gap-4 mb-8">
@@ -442,14 +457,14 @@ export default function ScanResults() {
             className="flex-1 bg-green-600 hover:bg-green-700"
           >
             <Camera className="h-4 w-4 mr-2" />
-            Scan Another Plant
+            Сканировать другое растение
           </Button>
           <Button 
             variant="outline" 
             onClick={() => navigate("/")}
             className="flex-1"
           >
-            Back to Home
+            Вернуться на главную
           </Button>
         </div>
       </div>
