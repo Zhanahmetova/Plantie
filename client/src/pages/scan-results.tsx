@@ -154,11 +154,7 @@ export default function ScanResults() {
                 {scan.healthScore}%
               </div>
               <div className="text-lg text-gray-600 uppercase tracking-wide">
-                {scan.overallHealth === 'excellent' ? 'ОТЛИЧНОЕ ЗДОРОВЬЕ' :
-                 scan.overallHealth === 'good' ? 'ХОРОШЕЕ ЗДОРОВЬЕ' :
-                 scan.overallHealth === 'fair' ? 'УДОВЛЕТВОРИТЕЛЬНОЕ ЗДОРОВЬЕ' :
-                 scan.overallHealth === 'poor' ? 'ПЛОХОЕ ЗДОРОВЬЕ' :
-                 scan.overallHealth === 'critical' ? 'КРИТИЧЕСКОЕ ЗДОРОВЬЕ' : scan.overallHealth}
+                {scan.overallHealth} Health
               </div>
               <Progress value={scan.healthScore} className="w-full" />
             </div>
@@ -194,7 +190,7 @@ export default function ScanResults() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Info className="h-5 w-5" />
-                Основной вид:
+                Plant Identification
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -203,14 +199,9 @@ export default function ScanResults() {
                 {scan.allSpeciesSuggestions[0] && (
                   <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                     <div className="text-lg font-semibold text-green-800 mb-2">
-                      {scan.allSpeciesSuggestions[0].name}
+                      This is "{scan.allSpeciesSuggestions[0].name}" with {scan.allSpeciesSuggestions[0].probability}% of probability.
                     </div>
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm text-gray-600 italic">{scan.allSpeciesSuggestions[0].scientificName}</p>
-                      <Badge variant="outline" className="text-sm">
-                        {scan.allSpeciesSuggestions[0].probability}% уверенности
-                      </Badge>
-                    </div>
+                    <p className="text-sm text-gray-600 italic mb-3">{scan.allSpeciesSuggestions[0].scientificName}</p>
                     
                     {/* Similar Images for primary identification */}
                     {scan.allSpeciesSuggestions && scan.allSpeciesSuggestions[0]?.similarImages && scan.allSpeciesSuggestions[0].similarImages.length > 0 && (
@@ -414,41 +405,26 @@ export default function ScanResults() {
         )}
 
         {/* Recommendations */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5" />
-              Рекомендации
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {scan.recommendations && Array.isArray(scan.recommendations) && scan.recommendations.length > 0 ? (
-                scan.recommendations.map((recommendation, index) => (
-                  <div key={index} className="flex items-start gap-3">
+        {scan.recommendations && Array.isArray(scan.recommendations) && scan.recommendations.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5" />
+                Recommendations
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                {scan.recommendations.map((recommendation, index) => (
+                  <li key={index} className="flex items-start gap-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
                     <span className="text-gray-700">{recommendation}</span>
-                  </div>
-                ))
-              ) : (
-                <>
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-gray-700">Ваше растение выглядит отлично!</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-gray-700">Продолжайте текущий уход</span>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-gray-700">Регулярно проверяйте на изменения</span>
-                  </div>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Action Buttons */}
         <div className="flex gap-4 mb-8">
@@ -457,14 +433,14 @@ export default function ScanResults() {
             className="flex-1 bg-green-600 hover:bg-green-700"
           >
             <Camera className="h-4 w-4 mr-2" />
-            Сканировать другое растение
+            Scan Another Plant
           </Button>
           <Button 
             variant="outline" 
             onClick={() => navigate("/")}
             className="flex-1"
           >
-            Вернуться на главную
+            Back to Home
           </Button>
         </div>
       </div>

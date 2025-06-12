@@ -180,15 +180,11 @@ export default function ARScanPage() {
             ) : recentScans && Array.isArray(recentScans) && recentScans.length > 0 ? (
               <div className="space-y-4">
                 {recentScans.slice(0, 5).map((scan: any, index: number) => (
-                  <div 
-                    key={index} 
-                    className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                    onClick={() => navigate(`/scan-results/${scan.id}`)}
-                  >
+                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        {scan.identifiedName && (
-                          <span className="font-medium">{scan.identifiedName}</span>
+                        {scan.identifiedPlantName && (
+                          <span className="font-medium">{scan.identifiedPlantName}</span>
                         )}
                         <Badge className={getHealthColor(scan.overallHealth)}>
                           {scan.overallHealth}

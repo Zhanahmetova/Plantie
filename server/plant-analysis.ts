@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-const PLANT_ID_API_KEY = process.env.PLANT_ID_API_KEY;
+const PLANT_ID_API_KEY = "XdKD593MYnx3NKXKWgeFTUzeCDG4D9liAymkGuiYPo7wb2vwru";
 const PLANT_ID_API_URL = "https://plant.id/api/v3/identification";
 
 interface PlantIdentificationResult {
