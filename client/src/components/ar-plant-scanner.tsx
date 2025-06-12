@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { useLocation } from "wouter";
+import { PlantIdentificationCard } from "./plant-identification-card";
 
 interface PlantHealthResult {
   scanId?: number;
@@ -38,6 +39,7 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
   const [scanProgress, setScanProgress] = useState(0);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const [scanResult, setScanResult] = useState<PlantHealthResult | null>(null);
+  const [fullScanData, setFullScanData] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -168,6 +170,9 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
       const result = await response.json();
       setScanProgress(100);
       
+      // Store full scan data for the identification card
+      setFullScanData(result);
+      
       // Transform backend response to match frontend interface
       return {
         scanId: result.id,
@@ -199,122 +204,22 @@ export function ARPlantScanner({ onClose, onScanComplete, className }: ARPlantSc
     performScan(imageData);
   };
 
-  const getHealthColor = (health: string) => {
-    switch (health) {
-      case "excellent": return "text-green-600";
-      case "good": return "text-green-500";
-      case "fair": return "text-yellow-500";
-      case "poor": return "text-orange-500";
-      case "critical": return "text-red-500";
-      default: return "text-gray-500";
-    }
-  };
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case "low": return "bg-yellow-100 text-yellow-800";
-      case "medium": return "bg-orange-100 text-orange-800";
-      case "high": return "bg-red-100 text-red-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
 
-  if (scanResult) {
+  if (scanResult && fullScanData) {
     return (
-      <div className={cn("fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4", className)}>
-        <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xl font-bold">Plant Health Analysis</CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => { stopCamera(); onClose(); }}>
-              <X className="h-4 w-4" />
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Overall Health Score */}
-            <div className="text-center space-y-2">
-              <div className={cn("text-3xl font-bold", getHealthColor(scanResult.overallHealth))}>
-                {scanResult.healthScore}%
-              </div>
-              <div className="text-sm text-muted-foreground uppercase tracking-wide">
-                {scanResult.overallHealth} Health
-              </div>
-              <Progress value={scanResult.healthScore} className="w-full" />
-            </div>
-
-            {/* Plant Identification */}
-            {scanResult.identifiedPlant && (
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Info className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium text-blue-900">Plant Identified</span>
-                </div>
-                <p className="text-blue-800">
-                  <strong>{scanResult.identifiedPlant.name}</strong> ({scanResult.identifiedPlant.species})
-                </p>
-                <p className="text-xs text-blue-600 mt-1">
-                  Confidence: {Math.round(scanResult.identifiedPlant.confidence * 100)}%
-                </p>
-              </div>
-            )}
-
-            {/* Health Issues */}
-            {scanResult.issues.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-amber-500" />
-                  Detected Issues
-                </h3>
-                <div className="space-y-3">
-                  {scanResult.issues.map((issue, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium">{issue.name}</h4>
-                        <Badge className={getSeverityColor(issue.severity)}>
-                          {issue.severity} severity
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">{issue.description}</p>
-                      <div className="bg-green-50 p-3 rounded">
-                        <p className="text-sm text-green-800">
-                          <strong>Treatment:</strong> {issue.treatment}
-                        </p>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Confidence: {Math.round(issue.confidence * 100)}%
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Recommendations */}
-            <div>
-              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                Care Recommendations
-              </h3>
-              <ul className="space-y-2">
-                {scanResult.recommendations.map((rec, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0" />
-                    <span className="text-sm">{rec}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="flex gap-2">
-              <Button onClick={() => { setScanResult(null); startCamera(); }} variant="outline" className="flex-1">
-                Scan Again
-              </Button>
-              <Button onClick={() => { stopCamera(); onClose(); }} className="flex-1">
-                Done
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <PlantIdentificationCard
+        scan={fullScanData}
+        onClose={() => {
+          stopCamera();
+          onClose();
+        }}
+        onSaveAsPlant={() => {
+          // TODO: Implement save as plant functionality
+          stopCamera();
+          onClose();
+        }}
+      />
     );
   }
 
