@@ -154,7 +154,11 @@ export default function ScanResults() {
                 {scan.healthScore}%
               </div>
               <div className="text-lg text-gray-600 uppercase tracking-wide">
-                {scan.overallHealth} Health
+                {scan.overallHealth === 'excellent' ? 'ОТЛИЧНОЕ ЗДОРОВЬЕ' :
+                 scan.overallHealth === 'good' ? 'ХОРОШЕЕ ЗДОРОВЬЕ' :
+                 scan.overallHealth === 'fair' ? 'УДОВЛЕТВОРИТЕЛЬНОЕ ЗДОРОВЬЕ' :
+                 scan.overallHealth === 'poor' ? 'ПЛОХОЕ ЗДОРОВЬЕ' :
+                 scan.overallHealth === 'critical' ? 'КРИТИЧЕСКОЕ ЗДОРОВЬЕ' : scan.overallHealth}
               </div>
               <Progress value={scan.healthScore} className="w-full" />
             </div>
@@ -190,7 +194,7 @@ export default function ScanResults() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Info className="h-5 w-5" />
-                Plant Identification
+                Основной вид:
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -199,9 +203,14 @@ export default function ScanResults() {
                 {scan.allSpeciesSuggestions[0] && (
                   <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                     <div className="text-lg font-semibold text-green-800 mb-2">
-                      This is "{scan.allSpeciesSuggestions[0].name}" with {scan.allSpeciesSuggestions[0].probability}% of probability.
+                      {scan.allSpeciesSuggestions[0].name}
                     </div>
-                    <p className="text-sm text-gray-600 italic mb-3">{scan.allSpeciesSuggestions[0].scientificName}</p>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm text-gray-600 italic">{scan.allSpeciesSuggestions[0].scientificName}</p>
+                      <Badge variant="outline" className="text-sm">
+                        {scan.allSpeciesSuggestions[0].probability}% уверенности
+                      </Badge>
+                    </div>
                     
                     {/* Similar Images for primary identification */}
                     {scan.allSpeciesSuggestions && scan.allSpeciesSuggestions[0]?.similarImages && scan.allSpeciesSuggestions[0].similarImages.length > 0 && (
