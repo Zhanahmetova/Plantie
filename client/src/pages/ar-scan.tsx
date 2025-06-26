@@ -4,7 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Camera, History, Info, AlertTriangle, CheckCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Camera,
+  History,
+  Info,
+  AlertTriangle,
+  CheckCircle,
+} from "lucide-react";
 import ARPlantScanner from "@/components/ar-plant-scanner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
@@ -61,12 +68,18 @@ export default function ARScanPage() {
 
   const getHealthColor = (health: string) => {
     switch (health) {
-      case "excellent": return "text-green-600 bg-green-50";
-      case "good": return "text-green-500 bg-green-50";
-      case "fair": return "text-yellow-500 bg-yellow-50";
-      case "poor": return "text-orange-500 bg-orange-50";
-      case "critical": return "text-red-500 bg-red-50";
-      default: return "text-gray-500 bg-gray-50";
+      case "excellent":
+        return "text-green-600 bg-green-50";
+      case "good":
+        return "text-green-500 bg-green-50";
+      case "fair":
+        return "text-yellow-500 bg-yellow-50";
+      case "poor":
+        return "text-orange-500 bg-orange-50";
+      case "critical":
+        return "text-red-500 bg-red-50";
+      default:
+        return "text-gray-500 bg-gray-50";
     }
   };
 
@@ -102,14 +115,17 @@ export default function ARScanPage() {
                 <Camera className="h-8 w-8 text-green-600" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold mb-2">Instant Plant Health Diagnosis</h2>
+                <h2 className="text-xl font-semibold mb-2">
+                  Instant Plant Health Diagnosis
+                </h2>
                 <p className="text-muted-foreground">
-                  Use advanced plant recognition to identify diseases, pests, and care issues instantly
+                  Use advanced plant recognition to identify diseases, pests,
+                  and care issues instantly
                 </p>
               </div>
-              <Button 
+              <Button
                 onClick={() => setShowScanner(true)}
-                size="lg" 
+                size="lg"
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
                 <Camera className="h-5 w-5 mr-2" />
@@ -177,25 +193,37 @@ export default function ARScanPage() {
               <div className="text-center py-8 text-muted-foreground">
                 Loading recent scans...
               </div>
-            ) : recentScans && Array.isArray(recentScans) && recentScans.length > 0 ? (
+            ) : recentScans &&
+              Array.isArray(recentScans) &&
+              recentScans.length > 0 ? (
               <div className="space-y-4">
                 {recentScans.slice(0, 5).map((scan: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         {scan.identifiedPlantName && (
-                          <span className="font-medium">{scan.identifiedPlantName}</span>
+                          <span className="font-medium">
+                            {scan.identifiedPlantName}
+                          </span>
                         )}
                         <Badge className={getHealthColor(scan.overallHealth)}>
                           {scan.overallHealth}
                         </Badge>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Progress value={scan.healthScore} className="flex-1 max-w-32" />
-                        <span className="text-sm text-muted-foreground">{scan.healthScore}%</span>
+                        <Progress
+                          value={scan.healthScore}
+                          className="flex-1 max-w-32"
+                        />
+                        <span className="text-sm text-muted-foreground">
+                          {scan.healthScore}%
+                        </span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(scan.createdAt).toLocaleDateString('en-GB')}
+                        {new Date(scan.createdAt).toLocaleDateString("en-GB")}
                       </p>
                     </div>
                   </div>
@@ -204,7 +232,9 @@ export default function ARScanPage() {
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <Camera className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No scans yet. Start your first AR scan to see results here.</p>
+                <p>
+                  No scans yet. Start your first AR scan to see results here.
+                </p>
               </div>
             )}
           </CardContent>

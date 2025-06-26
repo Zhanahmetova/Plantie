@@ -58,7 +58,7 @@ const Home: React.FC = () => {
           <div className="mb-7">
             <Link href="/ar-scan">
               <Card className="bg-gradient-to-r from-green-500 to-green-600 border-0 text-white hover:from-green-600 hover:to-green-700 transition-all duration-200 cursor-pointer transform hover:scale-[1.02]">
-                <CardContent className="p-6">
+                <CardContent className="p-6 hidden">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="p-3 bg-white/20 rounded-full">
