@@ -56,5 +56,8 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000"
+  "theme_color": "#10b981",
+  "description": "Your personal plant care assistant with AI-powered plant identification and health monitoring",
+  "scope": "/",
+  "orientation": "portrait"
 }

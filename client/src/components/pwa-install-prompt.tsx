@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Download, X } from "lucide-react";
+import { Download, X, Smartphone } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -103,5 +103,76 @@ export function PWAInstallPrompt() {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+// Permanent install button component
+export function PWAInstallButton({ variant = "default", size = "default" }: { 
+  variant?: "default" | "outline" | "ghost"; 
+  size?: "default" | "sm" | "lg" 
+}) {
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    // Check if app is already installed
+    const checkInstalled = () => {
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        setIsInstalled(true);
+      }
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    checkInstalled();
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) {
+      // Fallback: show instructions for manual installation
+      alert('To install Plantie:\n\n1. On Chrome: Click the menu (⋮) → "Install Plantie"\n2. On Safari: Click Share → "Add to Home Screen"\n3. On Firefox: Click menu → "Install"');
+      return;
+    }
+
+    try {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+        setIsInstalled(true);
+      }
+    } catch (error) {
+      console.error('Installation failed:', error);
+    }
+  };
+
+  if (isInstalled) {
+    return (
+      <Button variant={variant} size={size} disabled>
+        <Smartphone className="h-4 w-4 mr-2" />
+        Installed
+      </Button>
+    );
+  }
+
+  return (
+    <Button 
+      onClick={handleInstall}
+      variant={variant}
+      size={size}
+      className={variant === "default" ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+    >
+      <Download className="h-4 w-4 mr-2" />
+      Install App
+    </Button>
   );
 }

@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Scan, ChevronRight } from "lucide-react";
+import { PWAInstallButton } from "@/components/pwa-install-prompt";
 
 const Home: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -40,6 +41,7 @@ const Home: React.FC = () => {
                 {format(selectedDate, "EEEE, MMM dd, yyyy")}
               </p>
             </div>
+            <PWAInstallButton variant="outline" size="sm" />
           </div>
         </header>
 
