@@ -7,6 +7,7 @@ import { Suspense, lazy } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "./hooks/use-auth";
+import { PWAInstallPrompt } from "@/components/pwa-install-prompt";
 
 // Lazy-load page components
 const NotFound = lazy(() => import("@/pages/not-found"));
@@ -59,6 +60,7 @@ function App() {
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
+          <PWAInstallPrompt />
           <Suspense fallback={<LoadingSpinner fullscreen size="lg" text="Loading..." />}>
             <Router />
           </Suspense>

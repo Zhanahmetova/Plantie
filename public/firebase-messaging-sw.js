@@ -77,15 +77,15 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification?.title || 'Plant Care Reminder';
   const notificationOptions = {
     body: payload.notification?.body || 'You have a plant care task',
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/icon-96x96.png',
     tag: 'plant-care-notification',
     data: payload.data,
     actions: [
       {
         action: 'view',
         title: 'View Task',
-        icon: '/icon-192.png'
+        icon: '/icons/icon-96x96.png'
       },
       {
         action: 'dismiss',

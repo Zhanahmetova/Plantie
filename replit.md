@@ -61,10 +61,12 @@ This is a full-stack plant care application built with React (frontend) and Expr
 - Configurable notification preferences
 
 ### Progressive Web App Features
-- Service worker for offline functionality
-- Web app manifest for native app-like experience
+- Service worker with offline caching and background sync
+- Web app manifest with custom plant-themed icons
+- Install prompt component for home screen installation
 - Camera integration for plant photography
 - Responsive design optimized for mobile devices
+- Push notifications through Firebase Cloud Messaging
 
 ## Data Flow
 
@@ -107,6 +109,7 @@ This is a full-stack plant care application built with React (frontend) and Expr
 ## Changelog
 
 - June 26, 2025. Initial setup
+- June 27, 2025. Implemented PWA functionality with custom icons, manifest, service worker, offline caching, and install prompt
 
 ## User Preferences
 
