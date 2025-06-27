@@ -45,9 +45,9 @@ export function setupAuth(app: Express) {
     saveUninitialized: false,
     store: storage.sessionStore,
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    }
+    },
   };
 
   app.set("trust proxy", 1);
@@ -59,30 +59,34 @@ export function setupAuth(app: Express) {
     new LocalStrategy(async (username, password, done) => {
       try {
         const user = await storage.getUserByUsername(username);
-        if (!user || !user.password || !(await comparePasswords(password, user.password))) {
+        if (
+          !user ||
+          !user.password ||
+          !(await comparePasswords(password, user.password))
+        ) {
           return done(null, false, { message: "Invalid username or password" });
-        } 
+        }
         return done(null, user);
       } catch (error) {
         return done(error);
       }
     }),
   );
-  
+
   // Google OAuth Strategy
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     // Get the correct callback URL for this Replit environment
     const getCallbackURL = () => {
       // Use the actual Replit domain
-      if (process.env.REPL_SLUG && process.env.REPL_OWNER) {
-        return `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/auth/google/callback`;
-      }
+      // if (process.env.REPL_SLUG && process.env.REPL_OWNER) {
+      //   return `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/auth/google/callback`;
+      // }
       // Fallback for local development
-      return "http://localhost:5000/auth/google/callback";
+      return "https://planties.replit.app/auth/google/callback";
     };
 
     const callbackURL = getCallbackURL();
-    console.log('Google OAuth callback URL configured as:', callbackURL);
+    console.log("Google OAuth callback URL configured as:", callbackURL);
 
     passport.use(
       new GoogleStrategy(
@@ -92,48 +96,66 @@ export function setupAuth(app: Express) {
           callbackURL: callbackURL,
           scope: ["profile", "email"],
         } as any,
-        async (accessToken: string, refreshToken: string, profile: Profile, done: any) => {
+        async (
+          accessToken: string,
+          refreshToken: string,
+          profile: Profile,
+          done: any,
+        ) => {
           try {
             // Check if user already exists with this Google ID
             let user = await storage.getUserByGoogleId(profile.id);
-            
+
             if (!user) {
               // Check if user exists with the same email
-              const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
+              const email =
+                profile.emails && profile.emails[0]
+                  ? profile.emails[0].value
+                  : null;
               if (email) {
                 user = await storage.getUserByEmail(email);
               }
-              
+
               if (!user) {
                 // Create new user from Google profile
-                const username = profile.displayName.toLowerCase().replace(/\s+/g, "_") + 
-                                 "_" + profile.id.substring(0, 5);
-                
+                const username =
+                  profile.displayName.toLowerCase().replace(/\s+/g, "_") +
+                  "_" +
+                  profile.id.substring(0, 5);
+
                 user = await storage.createGoogleUser({
                   username,
                   email: email,
                   googleId: profile.id,
                   displayName: profile.displayName,
-                  profilePicture: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
+                  profilePicture:
+                    profile.photos && profile.photos[0]
+                      ? profile.photos[0].value
+                      : null,
                 });
               } else {
                 // Update existing user with Google info
                 user = await storage.updateUser(user.id, {
                   googleId: profile.id,
-                  profilePicture: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
+                  profilePicture:
+                    profile.photos && profile.photos[0]
+                      ? profile.photos[0].value
+                      : null,
                 });
               }
             }
-            
+
             return done(null, user);
           } catch (error) {
             return done(error as Error);
           }
-        }
-      )
+        },
+      ),
     );
   } else {
-    console.warn('Google OAuth credentials not configured. Google login will not be available.');
+    console.warn(
+      "Google OAuth credentials not configured. Google login will not be available.",
+    );
   }
 
   passport.serializeUser((user, done) => done(null, user.id));
@@ -165,23 +187,32 @@ export function setupAuth(app: Express) {
         res.status(201).json(userWithoutPassword);
       });
     } catch (error) {
-      console.error('Registration error:', error);
-      res.status(500).json({ message: "An error occurred during registration" });
+      console.error("Registration error:", error);
+      res
+        .status(500)
+        .json({ message: "An error occurred during registration" });
     }
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err: Error | null, user: SelectUser | false, info: { message: string }) => {
-      if (err) return next(err);
-      if (!user) return res.status(401).json(info);
-      
-      req.login(user, (err: Error | null) => {
+    passport.authenticate(
+      "local",
+      (
+        err: Error | null,
+        user: SelectUser | false,
+        info: { message: string },
+      ) => {
         if (err) return next(err);
-        // Don't send the password back to the client
-        const { password, ...userWithoutPassword } = user as SelectUser;
-        return res.status(200).json(userWithoutPassword);
-      });
-    })(req, res, next);
+        if (!user) return res.status(401).json(info);
+
+        req.login(user, (err: Error | null) => {
+          if (err) return next(err);
+          // Don't send the password back to the client
+          const { password, ...userWithoutPassword } = user as SelectUser;
+          return res.status(200).json(userWithoutPassword);
+        });
+      },
+    )(req, res, next);
   });
 
   app.post("/api/logout", (req, res, next) => {
@@ -192,7 +223,8 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.status(401).json({ message: "Not authenticated" });
+    if (!req.isAuthenticated())
+      return res.status(401).json({ message: "Not authenticated" });
     // Don't send the password back to the client
     const { password, ...userWithoutPassword } = req.user as SelectUser;
     res.json(userWithoutPassword);
@@ -201,59 +233,70 @@ export function setupAuth(app: Express) {
   // Google OAuth routes
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     app.get("/auth/google", (req, res, next) => {
-      console.log(`Google OAuth initiated from: ${req.protocol}://${req.get('host')}`);
+      console.log(
+        `Google OAuth initiated from: ${req.protocol}://${req.get("host")}`,
+      );
       passport.authenticate("google")(req, res, next);
     });
 
     app.get(
       "/auth/google/callback",
       (req: Request, res: Response, next: NextFunction) => {
-        console.log(`Google OAuth callback received at: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
-        console.log('Query params:', req.query);
-        console.log('Headers:', {
-          'user-agent': req.headers['user-agent'],
-          'referer': req.headers.referer,
-          'x-forwarded-proto': req.headers['x-forwarded-proto'],
-          'x-forwarded-host': req.headers['x-forwarded-host']
+        console.log(
+          `Google OAuth callback received at: ${req.protocol}://${req.get("host")}${req.originalUrl}`,
+        );
+        console.log("Query params:", req.query);
+        console.log("Headers:", {
+          "user-agent": req.headers["user-agent"],
+          referer: req.headers.referer,
+          "x-forwarded-proto": req.headers["x-forwarded-proto"],
+          "x-forwarded-host": req.headers["x-forwarded-host"],
         });
         next();
       },
-      passport.authenticate("google", { 
+      passport.authenticate("google", {
         failureRedirect: "/auth?error=google-auth-failed",
-        successRedirect: "/"
+        successRedirect: "/",
       }),
       (err: any, req: any, res: any, next: any) => {
-        console.error('Google OAuth callback error:', err);
-        res.status(400).json({ error: 'OAuth authentication failed', details: err.message });
-      }
+        console.error("Google OAuth callback error:", err);
+        res
+          .status(400)
+          .json({ error: "OAuth authentication failed", details: err.message });
+      },
     );
   }
-  
+
   // Change password endpoint
   app.post("/api/user/change-password", isAuthenticated, async (req, res) => {
     try {
       const { currentPassword, newPassword } = req.body;
       const userId = req.user!.id;
-      
+
       // Get the user with their password
       const user = await storage.getUser(userId);
-      
+
       if (!user || !user.password) {
-        return res.status(400).json({ 
-          message: "Cannot change password for accounts without a password" 
+        return res.status(400).json({
+          message: "Cannot change password for accounts without a password",
         });
       }
-      
+
       // Check if the current password is correct
-      const isCurrentPasswordValid = await comparePasswords(currentPassword, user.password);
+      const isCurrentPasswordValid = await comparePasswords(
+        currentPassword,
+        user.password,
+      );
       if (!isCurrentPasswordValid) {
-        return res.status(401).json({ message: "Current password is incorrect" });
+        return res
+          .status(401)
+          .json({ message: "Current password is incorrect" });
       }
-      
+
       // Hash the new password and update the user
       const hashedNewPassword = await hashPassword(newPassword);
       await storage.updateUser(userId, { password: hashedNewPassword });
-      
+
       res.status(200).json({ message: "Password updated successfully" });
     } catch (error) {
       console.error("Password change error:", error);
