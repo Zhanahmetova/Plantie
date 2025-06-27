@@ -71,23 +71,28 @@ export function setupAuth(app: Express) {
   
   // Google OAuth Strategy
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    // Dynamic callback URL based on request
-    const getDynamicCallbackURL = () => {
+    // Get the correct callback URL for this Replit environment
+    const getCallbackURL = () => {
+      // Use the actual Replit domain
       if (process.env.REPL_SLUG && process.env.REPL_OWNER) {
         return `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/auth/google/callback`;
       }
+      // Fallback for local development
       return "http://localhost:5000/auth/google/callback";
     };
+
+    const callbackURL = getCallbackURL();
+    console.log('Google OAuth callback URL configured as:', callbackURL);
 
     passport.use(
       new GoogleStrategy(
         {
           clientID: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: getDynamicCallbackURL(),
+          callbackURL: callbackURL,
           scope: ["profile", "email"],
-        },
-        async (req: Request, accessToken: string, refreshToken: string, profile: Profile, done: any) => {
+        } as any,
+        async (accessToken: string, refreshToken: string, profile: Profile, done: any) => {
           try {
             // Check if user already exists with this Google ID
             let user = await storage.getUserByGoogleId(profile.id);
