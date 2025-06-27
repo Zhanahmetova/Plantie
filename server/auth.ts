@@ -1,12 +1,13 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy as GoogleStrategy, Profile } from "passport-google-oauth20";
 import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser, InsertGoogleUser } from "@shared/schema";
+import { Request, Response, NextFunction } from "express";
 
 declare global {
   namespace Express {
@@ -70,10 +71,12 @@ export function setupAuth(app: Express) {
   
   // Google OAuth Strategy
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    const getCallbackURL = (req: any) => {
-      const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-      const host = req.headers['x-forwarded-host'] || req.get('host');
-      return `${protocol}://${host}/auth/google/callback`;
+    // Dynamic callback URL based on request
+    const getDynamicCallbackURL = () => {
+      if (process.env.REPL_SLUG && process.env.REPL_OWNER) {
+        return `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/auth/google/callback`;
+      }
+      return "http://localhost:5000/auth/google/callback";
     };
 
     passport.use(
@@ -81,10 +84,10 @@ export function setupAuth(app: Express) {
         {
           clientID: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: "/auth/google/callback",
+          callbackURL: getDynamicCallbackURL(),
           scope: ["profile", "email"],
         },
-        async (accessToken, refreshToken, profile, done) => {
+        async (req: Request, accessToken: string, refreshToken: string, profile: Profile, done: any) => {
           try {
             // Check if user already exists with this Google ID
             let user = await storage.getUserByGoogleId(profile.id);
@@ -199,14 +202,25 @@ export function setupAuth(app: Express) {
 
     app.get(
       "/auth/google/callback",
-      (req, res, next) => {
+      (req: Request, res: Response, next: NextFunction) => {
         console.log(`Google OAuth callback received at: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
+        console.log('Query params:', req.query);
+        console.log('Headers:', {
+          'user-agent': req.headers['user-agent'],
+          'referer': req.headers.referer,
+          'x-forwarded-proto': req.headers['x-forwarded-proto'],
+          'x-forwarded-host': req.headers['x-forwarded-host']
+        });
         next();
       },
       passport.authenticate("google", { 
         failureRedirect: "/auth?error=google-auth-failed",
         successRedirect: "/"
-      })
+      }),
+      (err: any, req: any, res: any, next: any) => {
+        console.error('Google OAuth callback error:', err);
+        res.status(400).json({ error: 'OAuth authentication failed', details: err.message });
+      }
     );
   }
   
