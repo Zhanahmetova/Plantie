@@ -71,7 +71,12 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createGoogleUser(insertUser: InsertGoogleUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
+    // Ensure password is explicitly null for Google users
+    const userWithNullPassword = {
+      ...insertUser,
+      password: null
+    };
+    const [user] = await db.insert(users).values(userWithNullPassword).returning();
     return user;
   }
   
