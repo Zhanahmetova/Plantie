@@ -43,7 +43,7 @@ const AddTaskPage: React.FC = () => {
       await addTask.mutateAsync({
         plantId: parseInt(formData.plantId),
         type: formData.type as 'watering' | 'misting' | 'fertilizing',
-        startDate: new Date(formData.startDate).toISOString(),
+        startDate: formData.startDate, // Send as YYYY-MM-DD format
         completed: false,
         repeat,
         userId: 0, // This will be set by the server

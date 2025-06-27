@@ -67,6 +67,16 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  startDate: z.string().transform((val) => {
+    // Handle both ISO date strings and YYYY-MM-DD format
+    const date = new Date(val);
+    if (isNaN(date.getTime())) {
+      throw new Error('Invalid date format');
+    }
+    // Convert to YYYY-MM-DD format
+    return date.toISOString().split('T')[0];
+  }),
 });
 
 // Weather preferences table

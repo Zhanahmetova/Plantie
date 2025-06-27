@@ -72,7 +72,7 @@ const EditTaskPage: React.FC = () => {
         id: taskId,
         plantId: parseInt(formData.plantId),
         type: formData.type as 'watering' | 'misting' | 'fertilizing',
-        startDate: new Date(formData.startDate).toISOString(),
+        startDate: formData.startDate, // Send as YYYY-MM-DD format
         repeat,
       });
 
